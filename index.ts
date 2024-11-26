@@ -1,7 +1,5 @@
 import { argv, file, Glob } from "bun";
 import { join, normalize, relative, resolve } from "node:path";
-import { zipRatio } from "./compress";
-import { time } from "./util";
 import ignore from "ignore";
 
 console.log("Hello via Bun!");
@@ -53,7 +51,6 @@ const fetchGitignoreEntries = async () =>
 const excludeGlobsPatterns = await time(fetchGitignoreEntries);
 
 // Read file tree recursively
-
 console.log(`Scanning ${targetDirectory} for files`);
 
 const ig = ignore().add(excludeGlobsPatterns);
@@ -88,10 +85,10 @@ const resolvedFiles = time(
 
 console.log(`Filtered down to ${resolvedFiles.length.toLocaleString()} files`);
 
-let printProgress = false;
+let printProgress = true;
 let progress = 0;
 
-// 2. Read file contents
+// Read file contents, compress and calculate compression rate
 const results = time(() =>
   resolvedFiles.map(async (f) => {
     const data = await file(f.fullPath).text();
@@ -114,11 +111,29 @@ const results = time(() =>
   })
 );
 
+// Report back tree with compression rates in terminal
 console.table(
   await Promise.all(results).then((results) =>
     results.sort((a, b) => +a.ratio - +b.ratio)
   )
 );
 
-// 3. Compress and calculate compression rate
-// 4. Report back tree with compression rates in terminal
+function zipRatio(data: Buffer) {
+  const size = data.length;
+  const compressed = Bun.gzipSync(data);
+  const compressedSize = compressed.length;
+  return { size, compressedSize, ratio: Math.min(compressedSize / size, 1) };
+}
+
+function time<T>(fn: () => T): T {
+  const start = performance.now();
+  const result = fn();
+  const end = performance.now();
+  console.log(`[${fn.name}] ${(end - start).toFixed(2)}ms`);
+  return result;
+}
+
+const inspect: <T>(d: T) => T = (d) => {
+  console.dir(d, { depth: null });
+  return d;
+};
