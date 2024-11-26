@@ -1,5 +1,7 @@
 # research-project
 
+This project uses [Bun](https://bun.sh/)
+
 To install dependencies:
 
 ```bash
