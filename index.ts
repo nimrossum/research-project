@@ -1,44 +1,124 @@
-import Bun, { $ } from "bun";
-import { readdir } from "fs/promises";
+import { argv, file, Glob } from "bun";
+import { join, normalize, relative, resolve } from "node:path";
+import { zipRatio } from "./compress";
+import { time } from "./util";
+import ignore from "ignore";
 
 console.log("Hello via Bun!");
 
-type Method = keyof typeof methods;
-const methods = {
-  rd: async () => await readdir(targetDirectory, { recursive: true }),
-  ls: async () => (await $`ls -R ${targetDirectory}`.text()).trim().split("\n"),
-} as const
-
-const method = Bun.argv[2];
-const targetDirectory = Bun.argv[3] ?? ".";
+const targetDirectory = normalize(argv[2] ?? ".");
 // Input: folder
 
-if (method === undefined) {
-  console.error(`Please provide method, got ${method}`);
-  process.exit(1);
-}
+let includeExtensions = [
+  "ts",
+  "js",
+  "txt",
+  "json",
+  "md",
+  "html",
+  "css",
+  "scss",
+  "sass",
+  "less",
+  "cs",
+  "java",
+  "py",
+  "go",
+  "rb",
+  "php",
+  "c",
+  "cpp",
+  "h",
+  "hpp",
+  "cshtml",
+  "xml",
+  "yml",
+  "yaml",
+  "toml",
+  "sh",
+  "bat",
+  "ps1",
+];
 
-console.log(`Method: ${method}`);
+const includeGlobPattern = join("**", `*.{${includeExtensions.join(",")}}`);
+console.log(`Scanning for files with extensions: ${includeGlobPattern}`);
 
-const methodFn = methods[method as Method];
+const includeGlob = new Glob(includeGlobPattern);
 
-if (methodFn === undefined) {
-  console.error(`Invalid method, got ${method}`);
-  process.exit(1);
-}
+const fetchGitignoreEntries = async () =>
+  (await file(join(targetDirectory, ".gitignore")).text())
+    .trim()
+    .split("\n")
+    .filter((x) => x.length > 0);
+const excludeGlobsPatterns = await time(fetchGitignoreEntries);
 
-// 1. LS file tree recursively
-const startTime = performance.now();
-const files = await methodFn();
+// Read file tree recursively
 
-const length = files.length;
-console.log(`Found ${length} files`);
+console.log(`Scanning ${targetDirectory} for files`);
 
-const stopTime = performance.now();
+const ig = ignore().add(excludeGlobsPatterns);
 
-// console.log(files.join("\n"));
-console.log(`Time taken: ${stopTime - startTime}ms`);
+const readDir = () =>
+  Array.from(
+    new Set(
+      ig.filter(
+        Array.from(
+          includeGlob.scanSync({
+            cwd: targetDirectory,
+            absolute: false,
+            onlyFiles: true,
+          })
+        )
+      )
+    )
+  );
+
+const entries = time(readDir);
+const length = entries.length;
+console.log(`Found ${length.toLocaleString()} files`);
+
+const mapEntriesToAbsolutePaths = () =>
+  entries.map((relativePath) => ({
+    relativePath,
+    fullPath: resolve(targetDirectory, relativePath),
+  }));
+const resolvedFiles = time(
+  mapEntriesToAbsolutePaths // Resolve to full path
+);
+
+console.log(`Filtered down to ${resolvedFiles.length.toLocaleString()} files`);
+
+let printProgress = false;
+let progress = 0;
 
 // 2. Read file contents
+const results = time(() =>
+  resolvedFiles.map(async (f) => {
+    const data = await file(f.fullPath).text();
+    if (printProgress) {
+      progress++;
+      console.clear();
+      console.log(`[${progress}/${length}] ${f.relativePath}`);
+    }
+    const { size, compressedSize, ratio } = zipRatio(data);
+    const { ratio: ratioWithoutWhiteSpace } = zipRatio(
+      data.toString().replace(/\s/g, "")
+    );
+    return {
+      relativePath: f.relativePath,
+      size,
+      compressedSize,
+      ratio: ratio,
+      ratioWithoutWhiteSpace: ratioWithoutWhiteSpace,
+    };
+  })
+);
+
+console.table(
+  await Promise.all(results).then((results) =>
+    results.sort((a, b) => +a.ratio - +b.ratio)
+  )
+);
+
 // 3. Compress and calculate compression rate
 // 4. Report back tree with compression rates in terminal

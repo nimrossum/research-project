@@ -3,8 +3,8 @@
   "module": "index.ts",
   "type": "module",
   "scripts": {
-    "start": "bun run .",
-    "dev": "bun --watch run .",
+    "start": "bun --bun run .",
+    "dev": "bun --bun --watch run .",
     "build:all": "bun run build:lin:arm & bun run build:lin:x64 & bun run build:mac:arm & bun run build:mac:x64 & bun run build:win:x64",
     "build": "bun build --compile --outfile bin/complexcity .",
     "build:watch": "bun build --watch --compile --outfile bin/complexcity .",
@@ -12,16 +12,16 @@
     "build:lin:x64": "bun build --compile --outfile bin/complexcity . --target=bun-linux-x64-modern",
     "build:mac:arm": "bun build --compile --outfile bin/complexcity . --target=bun-darwin-arm64",
     "build:mac:x64": "bun build --compile --outfile bin/complexcity . --target=bun-darwin-x64",
-    "build:win:x64": "bun build --compile --outfile bin/complexcity . --target=bun-windows-x64-modern",
-
-    "bench": "hyperfine --show-output --shell powershell.exe --warmup 3 'bun run . -- ls C:/Users/jonas/p/git-truck/node_modules' 'bun run . -- rd C:/Users/jonas/p/git-truck/node_modules'",
-    "bench2": "hyperfine --show-output --shell powershell.exe --warmup 3 'bun run . -- ls .' 'bun run . -- rd .'"
+    "build:win:x64": "bun build --compile --outfile bin/complexcity . --target=bun-windows-x64-modern"
   },
   "devDependencies": {
-    "@types/bun": "latest",
-    "@types/node": "^22.10.0"
+    "@types/bun": "latest"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "ignore": "^6.0.2",
+    "workerpool": "^9.2.0"
   }
 }
