@@ -1,6 +1,16 @@
 # research-project
 
-This project uses [Bun](https://bun.sh/)
+TLDR:
+
+To run this project, you need to have [Bun](https://bun.sh) installed.
+
+Then, download the `index.ts` file
+
+```bash
+curl -fsSL https://github.com/joglr/research-project/raw/main/index.ts | bun run -
+```
+
+## Development
 
 To install dependencies:
 

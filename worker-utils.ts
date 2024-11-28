@@ -3,9 +3,7 @@ export const generateWorkerFromScript = (code: string) =>
 
 export function streamFromWorkerScript<
   T,
-  I extends {
-    [Symbol.iterator]: () => IterableIterator<T>;
-  }
+  I extends IterableIterator<T>
 >(code: string, data: I) {
   const worker = generateWorkerFromScript(code);
 
@@ -41,9 +39,7 @@ export function streamFromWorkerScript<
 
 export function streamFromWorkerFile<
   T,
-  I extends {
-    [Symbol.iterator]: () => IterableIterator<T>;
-  }
+  I extends IterableIterator<T>
 >(file: File, data: I) {
   const worker = new Worker(URL.createObjectURL(file));
 

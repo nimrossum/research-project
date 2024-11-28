@@ -25,7 +25,8 @@
     "noPropertyAccessFromIndexSignature": false,
 
     // Custom settings
-    "noUncheckedIndexedAccess": true
+    "noUncheckedIndexedAccess": true,
+    "resolveJsonModule": true
   }
 }
 
