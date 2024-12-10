@@ -1,15 +1,12 @@
-import { argv, write } from "bun";
+import { writeFile } from "fs/promises";
 import { normalize } from "node:path";
-import { compute } from "./compute";
-
-console.log("Hello via Bun!");
+import { compute } from "./compute.ts";
 
 // Input: folder
-const targetDirectory = normalize(argv[2] ?? ".");
-
+const targetDirectory = normalize(process.argv[2] ?? ".");
 
 const data = await compute(targetDirectory);
 // Report back tree with compression rates in terminal
 console.table(data);
 
-write("data.json", JSON.stringify(data, null, 2));
+await writeFile("data.json", JSON.stringify(data, null, 2));

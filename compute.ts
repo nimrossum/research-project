@@ -1,7 +1,13 @@
-import { file, Glob } from "bun";
+import { readFile, stat, glob } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import ignore from "ignore";
-import { time, zipRatio } from "./util";
+import {
+  asyncIteratorToArray,
+  calculateNormalizedCompressionRatios,
+  direntToPath,
+  time,
+  zipRatio
+} from "./util.ts";
 
 let includeExtensions = [
   "ts",
@@ -36,10 +42,8 @@ let includeExtensions = [
 
 const includeGlobPattern = join("**", `*.{${includeExtensions.join(",")}}`);
 
-const includeGlob = new Glob(includeGlobPattern);
-
-async function fetchGitignoreEntries(targetDirectory: string) {
-  return (await file(join(targetDirectory, ".gitignore")).text())
+async function readGitignoreLines(targetDirectory: string) {
+  return (await readFile(join(targetDirectory, ".gitignore"), "utf-8"))
     .trim()
     .split("\n")
     .filter((x) => x.length > 0);
@@ -48,23 +52,22 @@ async function fetchGitignoreEntries(targetDirectory: string) {
 export async function compute(targetDirectory: string) {
   console.log(`Scanning for files with extensions: ${includeGlobPattern}`);
 
-  const excludeGlobsPatterns = await time(fetchGitignoreEntries)(targetDirectory);
+  const excludeGlobsPatterns = await time(readGitignoreLines)(targetDirectory);
 
   // Read file tree recursively
   console.log(`Scanning ${targetDirectory} for files`);
 
-  const ig = ignore().add(excludeGlobsPatterns);
+  const filterPaths = async (dir: string) =>
+    await asyncIteratorToArray(getDirReader(dir, excludeGlobsPatterns));
 
-  const filterPaths = (dir: string) =>
-    ig.filter(
-      Array.from(time(readDirPaths)(dir))
-    );
-
-  const entries = time(filterPaths)(targetDirectory);
+  const entries = await time(filterPaths)(targetDirectory);
   const length = entries.length;
   console.log(`Found ${length.toLocaleString()} files`);
 
-  const mapEntriesToAbsolutePaths = (targetDirectory: string, entries: string[]) =>
+  const mapEntriesToAbsolutePaths = (
+    targetDirectory: string,
+    entries: string[]
+  ) =>
     entries.map((relativePath) => ({
       relativePath,
       fullPath: resolve(targetDirectory, relativePath),
@@ -72,7 +75,7 @@ export async function compute(targetDirectory: string) {
 
   const resolvedFiles = time(
     mapEntriesToAbsolutePaths // Resolve to full path
-  )(targetDirectory, entries);
+  )(targetDirectory, entries.map(direntToPath));
 
   console.log(
     `Filtered down to ${resolvedFiles.length.toLocaleString()} files`
@@ -81,62 +84,55 @@ export async function compute(targetDirectory: string) {
   let printProgress = false;
   let progress = 0;
 
-  const calculateCompressionRatios = (resolvedFiles: {
-    relativePath: string;
-    fullPath: string;
-  }[]) => resolvedFiles.map(async (f) => {
-    const data = await file(f.fullPath).text();
-    if (printProgress) {
-      progress++;
-      console.clear();
-      console.log(`[${progress}/${length}] ${f.relativePath}`);
-    }
-    const { size, compressedSize, ratio } = zipRatio(Buffer.from(data));
-    const { ratio: ratioWithoutWhiteSpace } = zipRatio(
-      Buffer.from(data.toString().replace(/\s/g, ""))
-    );
-    return {
-      relativePath: f.relativePath,
-      size,
-      compressedSize,
-      ratio: ratio,
-      ratioWithoutWhiteSpace: ratioWithoutWhiteSpace,
-    };
-  });
   // Read file contents, compress and calculate compression rate
-  const results = time(calculateCompressionRatios
-  )(resolvedFiles);
+  // const results = time(calculateCompressionRatios)(resolvedFiles);
 
-  const data = await Promise.all(results).then((results) =>
-    results.sort((a, b) => +a.ratio - +b.ratio)
+  // const data = await Promise.all(results).then((results) =>
+  //   results.sort((a, b) => +a.ratio - +b.ratio)
+  // );
+
+  const results = await time(calculateNormalizedCompressionRatios)(
+    resolvedFiles.map((f) => f.fullPath)
   );
 
-  return data
+  const data = await Promise.all(results).then((results) =>
+    results.sort((a, b) => +a.NCR - +b.NCR)
+  );
+
+  return data;
 }
 
-function readDirPaths(dir: string) {
-  return includeGlob.scanSync({
+function getDirReader(dir: string, ignorePatterns: string[]) {
+  const ig = ignore().add(ignorePatterns);
+  return glob(includeGlobPattern, {
     cwd: dir,
-    absolute: false,
-    onlyFiles: true,
-  })
+    withFileTypes: true,
+    exclude(fileName) {
+      return fileName.isDirectory() || ig.ignores(fileName.name);
+    },
+  });
 }
 
-export async function* computeStream(targetDirectory: string) {
-  const excludeGlobsPatterns = await fetchGitignoreEntries(targetDirectory);
+export async function* computeStream(
+  targetDirectory: string,
+  excludeGitisnore = false
+) {
+  const excludeGlobsPatterns = await readGitignoreLines(targetDirectory);
   const ig = ignore().add(excludeGlobsPatterns);
 
-  for (const entry of readDirPaths(targetDirectory)) {
-    if (ig.ignores(entry)) {
+  for await (const entry of getDirReader(
+    targetDirectory,
+    excludeGlobsPatterns
+  )) {
+    if (excludeGitisnore && ig.ignores(direntToPath(entry))) {
       // continue
     }
-    const absoluteFilePath = resolve(targetDirectory, entry);
-    const controller = yield JSON.stringify({
+    const absoluteFilePath = direntToPath(entry);
+    yield JSON.stringify({
       absolutePath: absoluteFilePath,
       relativePath: entry,
-      size: file(absoluteFilePath).size,
-      children: []
+      size: (await stat(absoluteFilePath)).size,
+      children: [],
     }) + "\n";
-    controller.flush()
   }
 }
