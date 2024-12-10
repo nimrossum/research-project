@@ -4,7 +4,10 @@
   "main": "index.ts",
   "type": "module",
   "scripts": {
-    "start": "node --experimental-strip-types ."
+    "start": "node --experimental-strip-types .",
+    "serve": "node --experimental-strip-types serve.ts",
+    "build": "esbuild module.tsx --format=esm --bundle --outfile=build/module.js",
+    "build:prod": "esbuild module.tsx --format=esm --minify --bundle --outfile=build/module.js"
   },
   "peerDependencies": {
     "typescript": "^5.7.2"
@@ -13,20 +16,20 @@
     "@mongodb-js/zstd": "^2.0.0",
     "@types/d3": "^7.4.3",
     "@types/node": "^22.10.1",
-    "@types/react": "npm:types-react@rc",
-    "@types/react-dom": "npm:types-react-dom@rc",
+    "@types/react": "^19.0.1",
+    "@types/react-dom": "^19.0.2",
     "d3": "^7.9.0",
+    "express": "^5.0.1",
     "ignore": "^6.0.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "workerpool": "^9.2.0",
-    "zstd.ts": "^1.1.3"
+    "workerpool": "^9.2.0"
   },
   "trustedDependencies": [
     "@mongodb-js/zstd"
   ],
-  "overrides": {
-    "@types/react": "npm:types-react@rc",
-    "@types/react-dom": "npm:types-react-dom@rc"
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "esbuild": "^0.24.0"
   }
 }

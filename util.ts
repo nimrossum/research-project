@@ -82,11 +82,11 @@ export async function calculateNormalizedCompressionRatios(
 
   // 4. Calculate the normalized compression ratio for each file
 
-  const results = filePaths.map((f) => {
-    const _A_ = _A_Map.get(f)!;
-    const _R_ = _R_map.get(f)!;
-    const NCR = (_AR_ - _A_) / _R_;
-    return { f, NCR };
+  const results = filePaths.map((A) => {
+    const _A_ = _A_Map.get(A)!;
+    const _R_ = _R_map.get(A)!;
+    const NCR_A = (_AR_ - _A_) / _R_;
+    return { A, NCR_A };
   });
 
   return results;
@@ -135,4 +135,5 @@ export const asyncIteratorToArray = async <T>(
   return result;
 };
 
-export const direntToPath = (dirent: Dirent) => join(dirent.parentPath, dirent.name);
+export const direntToPath = (dirent: Dirent) =>
+  join(dirent.parentPath, dirent.name);

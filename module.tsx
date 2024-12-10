@@ -1,19 +1,15 @@
 import * as d3 from "d3";
 import {
   Suspense,
-  use,
   useDeferredValue,
   useMemo,
-  useState,
   useSyncExternalStore,
   type MouseEvent,
 } from "react";
 import { createRoot } from "react-dom/client";
+import type { compute } from "./compute";
 
-type Entry = {
-  absolutePath: string;
-  relativePath: string;
-  size: number;
+type Entry = Awaited<ReturnType<typeof compute>>[number] & {
   children: Entry[];
 };
 
@@ -96,14 +92,17 @@ const height = window.innerHeight;
 
 const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
 
-function SVG() {
-  const entries = useStream();
+// function SVG({ entriesStream }: { entriesStream: EntriesStream }) {
+function SVG({ entries }: { entries: Entry[] }) {
+  // const entries = useStream(entriesStream);
+
+  console.log(entries);
 
   const tmapFunc = useMemo(
     () =>
       d3
         .treemap<Entry>()
-        .tile(d3.treemapSquarify)
+        .tile(d3.treemapResquarify)
         .size([width, height])
         .padding(0),
     [width, height]
@@ -112,12 +111,11 @@ function SVG() {
   const nodes = useMemo(() => {
     const hierarchyRoot = d3
       .hierarchy<Entry>({
-        relativePath: ".",
-        absolutePath: ".",
-        size: 0,
+        A: ".",
+        NCR_A: 1,
         children: entries,
       } satisfies Entry)
-      .sum((d) => d.size)
+      .sum((d) => d.NCR_A)
       .sort((a, b) => (b.value ?? 0) - (a.value ?? 0));
 
     const tmap = tmapFunc(hierarchyRoot);
@@ -127,23 +125,23 @@ function SVG() {
 
   const gNodes = nodes.map((d) => (
     <g
-      key={d.data.absolutePath}
+      key={d.data.A}
       transform={`translate(${d.x0},${d.y0})`}
       style={{ transition: "transform 0.5s", willChange: "transform" }}
     >
       <rect
         width={d.x1 - d.x0}
         height={d.y1 - d.y0}
-        stroke={colorScale(d.data.size.toString())}
-        fill={colorScale(d.data.size.toString())}
+        stroke={colorScale(d.data.NCR_A.toString())}
+        fill={colorScale(d.data.NCR_A.toString())}
         style={{
           transition: "width 0.5s, height 0.5s",
           willChange: "width, height",
         }}
         data-entry={JSON.stringify(d.data)}
       />
-      <text x={5} y={20} fill="white" font-size="12px" font-family="Arial">
-        {d.data.relativePath}
+      <text x={5} y={20} fill="white" fontSize="12px" fontFamily="Arial">
+        {d.data.A}
       </text>
     </g>
   ));
@@ -165,35 +163,33 @@ function SVG() {
   );
 }
 
-function Test() {
-  const data = use(new Promise(resolve=> {
-    console.log("Fetching data");
-    resolve({ hello: "world" });
-  }));
-
-
-
-  return data.hello;
-}
-
-function useStream() {
-  const stream = useState(() => (fetch("./data.json"))).body;
-  if (!stream) {
-    throw new Error("No data");
-  }
-  const entriesStream = new EntriesStream(stream);
+function useStream(entriesStream: EntriesStream) {
   const entries = useSyncExternalStore<Entry[]>(
-    entriesStream.subscribe,
-    entriesStream.getEntries
+    (fn) => entriesStream.subscribe(fn),
+    () => entriesStream.getEntries()
   );
   return useDeferredValue(entries);
 }
 
+const response = await fetch("./data.json");
+if (!response.body) {
+  throw new Error(`No data: ${response.status}`);
+}
+
 const root = createRoot(document.getElementById("root")!);
+
+// Stream is broken for now, due to compute() not being able to be streamed
+// const entriesStream = new EntriesStream(response.body);
+// root.render(
+//   <Suspense fallback="Initializing...">
+//     <SVG entriesStream={entriesStream} />
+//   </Suspense>
+// );
+
+const entries = await response.json();
 
 root.render(
   <Suspense fallback="Initializing...">
-    {/* <SVG /> */}
-    <Test />
+    <SVG entries={entries} />
   </Suspense>
 );

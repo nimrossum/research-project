@@ -6,7 +6,7 @@ import {
   calculateNormalizedCompressionRatios,
   direntToPath,
   time,
-  zipRatio
+  zipRatio,
 } from "./util.ts";
 
 let includeExtensions = [
@@ -84,19 +84,12 @@ export async function compute(targetDirectory: string) {
   let printProgress = false;
   let progress = 0;
 
-  // Read file contents, compress and calculate compression rate
-  // const results = time(calculateCompressionRatios)(resolvedFiles);
-
-  // const data = await Promise.all(results).then((results) =>
-  //   results.sort((a, b) => +a.ratio - +b.ratio)
-  // );
-
   const results = await time(calculateNormalizedCompressionRatios)(
     resolvedFiles.map((f) => f.fullPath)
   );
 
   const data = await Promise.all(results).then((results) =>
-    results.sort((a, b) => +a.NCR - +b.NCR)
+    results.sort((a, b) => +a.NCR_A - +b.NCR_A)
   );
 
   return data;
