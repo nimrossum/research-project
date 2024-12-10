@@ -1,27 +1,17 @@
 # research-project
 
-TLDR:
+To run this project, you need to have [Node.js](https://nodejs.org) installed.
 
-To run this project, you need to have [Bun](https://bun.sh) installed.
-
-Then, download the `index.ts` file
-
-```bash
-curl -fsSL https://github.com/joglr/research-project/raw/main/index.ts | bun run -
-```
-
-## Development
+Tested with Node.js version 23.3.0
 
 To install dependencies:
 
 ```bash
-bun install
+npm install
 ```
 
 To run:
 
 ```bash
-bun run index.ts
+node --experimental-strip-types . [path] [format=table|json]
 ```
-
-This project was created using `bun init` in bun v1.1.37. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.

@@ -5,18 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "node --experimental-strip-types .",
-    "dev": "bun --bun --watch run .",
-    "typecheck": "tsc",
-    "build:web:watch": "bun --watch build ./module.tsx --outdir ./build",
-    "build:web": "bun build ./module.tsx --outdir ./build",
-    "build:all": "bun run build:lin:arm & bun run build:lin:x64 & bun run build:mac:arm & bun run build:mac:x64 & bun run build:win:x64",
-    "build": "bun build --compile --outfile bin/complexcity .",
-    "build:watch": "bun build --watch --compile --outfile bin/complexcity .",
-    "build:lin:arm": "bun build --compile --outfile bin/complexcity . --target=bun-linux-arm64",
-    "build:lin:x64": "bun build --compile --outfile bin/complexcity . --target=bun-linux-x64-modern",
-    "build:mac:arm": "bun build --compile --outfile bin/complexcity . --target=bun-darwin-arm64",
-    "build:mac:x64": "bun build --compile --outfile bin/complexcity . --target=bun-darwin-x64",
-    "build:win:x64": "bun build --compile --outfile bin/complexcity . --target=bun-windows-x64-modern"
+    "start:save": "node --experimental-strip-types . > data.json",
   },
   "peerDependencies": {
     "typescript": "^5.7.2"

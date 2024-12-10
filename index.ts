@@ -1,12 +1,25 @@
-import { writeFile } from "fs/promises";
 import { normalize } from "node:path";
 import { compute } from "./compute.ts";
 
+const outputFormatFns = {
+  table: console.table,
+  json: (data: any) => console.log(JSON.stringify(data, null, 2)),
+};
+
+type OutputFormat = keyof typeof outputFormatFns;
+
+const targetDirectory = process.argv[2] ?? ".";
 // Input: folder
-const targetDirectory = normalize(process.argv[2] ?? ".");
+const targetDirectoryNormalized = normalize(targetDirectory);
+const format = process.argv[3] ?? "table";
 
-const data = await compute(targetDirectory);
-// Report back tree with compression rates in terminal
-console.table(data);
+console.log(`Computing stats for ${targetDirectory}`);
+const data = await compute(targetDirectoryNormalized);
 
-await writeFile("data.json", JSON.stringify(data, null, 2));
+const outputFormats = Object.keys(outputFormatFns);
+if (!outputFormats.includes(format)) {
+  console.error(`Invalid format: ${format}`);
+  console.error(`Valid formats: ${outputFormats.join(", ")}`);
+}
+
+outputFormatFns[format as OutputFormat](data);

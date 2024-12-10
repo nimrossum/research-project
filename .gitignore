@@ -175,3 +175,6 @@ dist
 .DS_Store
 bin
 build
+
+
+data.json
