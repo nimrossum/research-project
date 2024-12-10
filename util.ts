@@ -48,7 +48,7 @@ export async function calculateNormalizedCompressionRatios(
       const ABuffer = Buffer.from(AArrayBufferLike);
       ARawMap.set(f, ABuffer);
       // 2. Compress file
-      const _A_ = (await compress(ABuffer, "zstd")).length;
+      const _A_ = (await compress(ABuffer, "zstd")).byteLength;
       // 3. Store A and _A_ in a map
       AMap.set(f, A);
       _A_Map.set(f, _A_);
@@ -58,10 +58,11 @@ export async function calculateNormalizedCompressionRatios(
   const fileBuffers = Array.from(ARawMap.values());
   const concatenatedBuffer = Buffer.concat(fileBuffers);
 
-  const AR = concatenatedBuffer.length;
+  // _AR_ is the size of the all files concatenated
+  const AR = concatenatedBuffer.byteLength;
 
   // _AR_ is the compressed size of the all files concatenated
-  const _AR_ = (await compress(concatenatedBuffer, "zstd")).length;
+  const _AR_ = (await compress(concatenatedBuffer, "zstd")).byteLength;
 
   // 3. For each file A, calculate the compression R for all files except A
   void (await Promise.all(
