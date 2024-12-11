@@ -6,7 +6,7 @@ const compressionAlgorithms = {
 
 export function compress(
   data: Buffer,
-  method: keyof typeof compressionAlgorithms
+  method: keyof typeof compressionAlgorithms = "zstd"
 ) {
   return compressionAlgorithms[method](data);
 }

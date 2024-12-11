@@ -4,7 +4,7 @@ import ignore from "ignore";
 import { time } from "./utils/misc.ts";
 import { asyncIteratorToArray } from "./utils/iterator.ts";
 import { direntToPath } from "./utils/file.ts";
-import { calculateNormalizedCompressionRatios } from "./NCR/NCR.ts";
+import { calculateNormalizedCompressionRatios } from "./NCR/ncr.ts";
 import { getDirReader } from "./utils/file.ts";
 
 const defaultIncludeExtensions = [

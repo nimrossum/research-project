@@ -1,9 +1,9 @@
-import { computeNCRForRepositoryFiles, computeStream } from "./compute.ts";
+import { computeNCRForRepositoryFiles, computeStream } from "../compute.ts";
 import express from "express";
 
 const app = express();
 
-app.use(express.static("public"));
+app.use(express.static("web/public"));
 app.use(express.static("build"));
 
 app.use(async (req, res, next) => {

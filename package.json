@@ -4,10 +4,13 @@
   "main": "index.ts",
   "type": "module",
   "scripts": {
-    "start": "node --experimental-strip-types .",
-    "serve": "node --experimental-strip-types serve.ts",
-    "build": "esbuild module.tsx --format=esm --bundle --outfile=build/module.js",
-    "build:prod": "esbuild module.tsx --format=esm --minify --bundle --outfile=build/module.js"
+    "start": "node --run build && node --run serve",
+    "ncr-repo": "node --experimental-strip-types cli/ncr-repo.ts",
+    "compress": "node --experimental-strip-types cli/compress.ts",
+    "serve": "node --experimental-strip-types cli/serve.ts",
+    "test": "node --experimental-strip-types --test",
+    "build": "esbuild web/src/module.tsx --format=esm --bundle --outfile=build/module.js",
+    "build:prod": "esbuild web/src/module.tsx --format=esm --minify --bundle --outfile=build/module.js"
   },
   "peerDependencies": {
     "typescript": "^5.7.2"

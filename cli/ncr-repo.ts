@@ -1,5 +1,5 @@
 import { normalize } from "node:path";
-import { computeNCRForRepositoryFiles } from "./compute.ts";
+import { computeNCRForRepositoryFiles } from "../compute.ts";
 
 const outputFormatFns = {
   table: console.table,
