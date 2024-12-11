@@ -1,5 +1,3 @@
-Add papers (preprints, not proceedings)
-  - Student projects
-    - Fast git Truck
-  - Conference papers (more credibility)
-    - Git Truck
+- [ ] Add test
+- [ ] Handle directories recursively
+- [ ] Handle error when there is no .gitignore
