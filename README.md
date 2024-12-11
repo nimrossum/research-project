@@ -10,8 +10,10 @@ To install dependencies:
 npm install
 ```
 
-To run:
+To run NCR and show a treemap on http://localhost:3000:
 
 ```bash
-node --experimental-strip-types . [path] [format=table|json]
+npm start
 ```
+
+T
