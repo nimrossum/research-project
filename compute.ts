@@ -1,13 +1,8 @@
 import { readFile, stat, glob } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import ignore from "ignore";
-import {
-  asyncIteratorToArray,
-  calculateNormalizedCompressionRatios,
-  direntToPath,
-  time,
-  zipRatio,
-} from "./util.ts";
+import { asyncIteratorToArray, direntToPath, time, zipRatio } from "./util.ts";
+import { calculateNormalizedCompressionRatios } from "./NCR.ts";
 
 let includeExtensions = [
   "ts",
