@@ -1,4 +1,4 @@
-import { compute, computeStream } from "./compute.ts";
+import { computeNCRForRepositoryFiles, computeStream } from "./compute.ts";
 import express from "express";
 
 const app = express();
@@ -8,7 +8,7 @@ app.use(express.static("build"));
 
 app.use(async (req, res, next) => {
   if (req.path === "/data.json") {
-    res.json(await compute("C:/Users/jonas/p/git-truck"));
+    res.json(await computeNCRForRepositoryFiles("C:/Users/jonas/p/git-truck"));
   } else {
     next();
   }

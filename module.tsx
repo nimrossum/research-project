@@ -7,9 +7,11 @@ import {
   type MouseEvent,
 } from "react";
 import { createRoot } from "react-dom/client";
-import type { compute } from "./compute";
+import type { computeNCRForRepositoryFiles } from "./compute";
 
-type Entry = Awaited<ReturnType<typeof compute>>[number] & {
+type Entry = Awaited<
+  ReturnType<typeof computeNCRForRepositoryFiles>
+>[number] & {
   children: Entry[];
 };
 

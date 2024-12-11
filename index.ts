@@ -1,5 +1,5 @@
 import { normalize } from "node:path";
-import { compute } from "./compute.ts";
+import { computeNCRForRepositoryFiles } from "./compute.ts";
 
 const outputFormatFns = {
   table: console.table,
@@ -14,7 +14,7 @@ const targetDirectoryNormalized = normalize(targetDirectory);
 const format = process.argv[3] ?? "table";
 
 console.log(`Computing stats for ${targetDirectory}`);
-const data = await compute(targetDirectoryNormalized);
+const data = await computeNCRForRepositoryFiles(targetDirectoryNormalized);
 
 const outputFormats = Object.keys(outputFormatFns);
 if (!outputFormats.includes(format)) {

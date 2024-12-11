@@ -1,6 +1,5 @@
 import { readFile } from "fs/promises";
-import { compress } from "./util.ts";
-
+import { compress } from "./compress.ts";
 
 /**
  * Calculate the normalized compression ratio for all files in a directory
