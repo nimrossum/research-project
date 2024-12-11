@@ -1,8 +1,11 @@
 import { readFile, stat, glob } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import ignore from "ignore";
-import { asyncIteratorToArray, direntToPath, time } from "./util.ts";
+import { time } from "./utils/misc.ts";
+import { asyncIteratorToArray } from "./utils/iterator.ts";
+import { direntToPath } from "./utils/file.ts";
 import { calculateNormalizedCompressionRatios } from "./NCR/NCR.ts";
+import { getDirReader } from "./utils/file.ts";
 
 const defaultIncludeExtensions = [
   "ts",
@@ -107,23 +110,6 @@ export async function computeNCRForRepositoryFiles(
   );
 
   return data;
-}
-
-function getDirReader(
-  dir: string,
-  {
-    include: includeGlobs,
-    exclude: excludeGlobs,
-  }: { include: string | string[]; exclude: string | string[] }
-) {
-  const ig = ignore().add(excludeGlobs);
-  return glob(includeGlobs, {
-    cwd: dir,
-    withFileTypes: true,
-    exclude(fileName) {
-      return fileName.isDirectory() || ig.ignores(fileName.name);
-    },
-  });
 }
 
 export async function* computeStream(
