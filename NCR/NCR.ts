@@ -73,12 +73,20 @@ export async function calculateNormalizedCompressionRatios(
   }
 
   // 4. Calculate the normalized compression ratio for each file
-  const results = filePaths.map((A) => {
-    const _A_ = _A_Map.get(A)!;
-    const _R_ = _R_map.get(A)!;
+  const NCR_As = filePaths.map((fp) => {
+    const A = AMap.get(fp)!;
+    const _A_ = _A_Map.get(fp)!;
+    const _R_ = _R_map.get(fp)!;
     const NCR_A = (_AR_ - _A_) / _R_;
-    return { A, NCR_A };
+    return {
+      file: fp,
+      A,
+      _A_,
+      NCR_A,
+      fileCompressionRatio: _A_ / A,
+      fractionOfRepo: A / AR,
+    };
   });
 
-  return results;
+  return { AR, _AR_, NCR_As };
 }
