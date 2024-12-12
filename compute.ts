@@ -44,7 +44,7 @@ const defaultIncludeGlob = join(
 );
 
 async function readGitignoreLines(targetDirectory: string) {
-  return (await readFile(join(targetDirectory, ".gitignore"), "utf-8"))
+  return (await readFile(resolve(targetDirectory, ".gitignore"), "utf-8"))
     .trim()
     .split("\n")
     .filter((x) => x.length > 0);
