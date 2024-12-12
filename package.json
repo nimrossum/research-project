@@ -3,6 +3,11 @@
   "module": "index.ts",
   "main": "index.ts",
   "type": "module",
+  "bin": {
+    "ncr-repo": "cli/ncr-repo.ts",
+    "compress": "cli/compress.ts",
+    "serve-ncr": "cli/serve.ts"
+  },
   "scripts": {
     "start": "node --run build && node --run serve",
     "ncr-repo": "node --experimental-strip-types cli/ncr-repo.ts",
