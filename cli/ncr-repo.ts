@@ -1,3 +1,5 @@
+#!/usr/bin/env node --experimental-strip-types
+
 import { normalize } from "node:path";
 import { computeNCRForRepositoryFiles } from "../compute.ts";
 
@@ -21,9 +23,11 @@ if (!outputFormats.includes(format)) {
 }
 
 console.log(`Computing stats for ${targetDirectory}`);
-const { AR, _AR_, NCR_As: normalizedCompressionRatios } = await computeNCRForRepositoryFiles(
-  targetDirectoryNormalized
-);
+const {
+  AR,
+  _AR_,
+  NCR_As: normalizedCompressionRatios,
+} = await computeNCRForRepositoryFiles(targetDirectoryNormalized);
 
 const data = normalizedCompressionRatios.sort((a, b) => +a.A - +b.A);
 

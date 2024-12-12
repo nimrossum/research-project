@@ -1,21 +1,22 @@
 {
   "name": "research-project",
   "module": "index.ts",
-  "main": "index.ts",
+  "main": "cli/serve.ts",
   "type": "module",
   "bin": {
     "ncr-repo": "cli/ncr-repo.ts",
-    "compress": "cli/compress.ts",
-    "serve-ncr": "cli/serve.ts"
+    "compress": "cli/compress.ts"
   },
   "scripts": {
     "start": "node --run build && node --run serve",
-    "ncr-repo": "node --experimental-strip-types cli/ncr-repo.ts",
-    "compress": "node --experimental-strip-types cli/compress.ts",
-    "serve": "node --experimental-strip-types cli/serve.ts",
-    "test": "node --experimental-strip-types --test",
-    "build": "esbuild web/src/module.tsx --format=esm --bundle --outfile=build/module.js",
-    "build:prod": "esbuild web/src/module.tsx --format=esm --minify --bundle --outfile=build/module.js"
+    "ncr-repo": "node --experimental-strip-types --no-warnings cli/ncr-repo.ts",
+    "compress": "node --experimental-strip-types --no-warnings cli/compress.ts",
+    "serve": "node --experimental-strip-types --no-warnings cli/serve.ts",
+    "serve:watch": "node --watch --experimental-strip-types --no-warnings cli/serve.ts",
+    "test": "node --experimental-strip-types --no-warnings --test",
+    "build": "esbuild web/src/index.tsx --format=esm --bundle --outfile=build/module.js",
+    "build:watch": "esbuild --watch web/src/index.tsx --format=esm --bundle --outfile=build/module.js",
+    "build:prod": "esbuild web/src/index.tsx --format=esm --minify --bundle --outfile=build/module.js"
   },
   "peerDependencies": {
     "typescript": "^5.7.2"

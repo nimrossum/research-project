@@ -1,3 +1,5 @@
+#!/usr/bin/env node --experimental-strip-types
+
 import { readFileSync } from "fs";
 import { compress } from "../NCR/compress.ts";
 

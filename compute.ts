@@ -7,47 +7,16 @@ import { direntToPath } from "./utils/file.ts";
 import { calculateNormalizedCompressionRatios } from "./NCR/ncr.ts";
 import { getDirReader } from "./utils/file.ts";
 
-const defaultIncludeExtensions = [
-  "ts",
-  "js",
-  "txt",
-  "json",
-  "md",
-  "html",
-  "css",
-  "scss",
-  "sass",
-  "less",
-  "cs",
-  "java",
-  "py",
-  "go",
-  "rb",
-  "php",
-  "c",
-  "cpp",
-  "h",
-  "hpp",
-  "cshtml",
-  "xml",
-  "yml",
-  "yaml",
-  "toml",
-  "sh",
-  "bat",
-  "ps1",
-];
-
-const defaultIncludeGlob = join(
-  "**",
-  `*.{${defaultIncludeExtensions.join(",")}}`
-);
-
 async function readGitignoreLines(targetDirectory: string) {
-  return (await readFile(resolve(targetDirectory, ".gitignore"), "utf-8"))
-    .trim()
-    .split("\n")
-    .filter((x) => x.length > 0);
+  try {
+    return (await readFile(resolve(targetDirectory, ".gitignore"), "utf-8"))
+      .trim()
+      .split("\n")
+      .filter((x) => x.length > 0);
+  } catch (error) {
+    console.warn("Warning: No .gitignore file found in target directory");
+    return [];
+  }
 }
 
 /**
@@ -56,15 +25,29 @@ async function readGitignoreLines(targetDirectory: string) {
  * excluding files that match the patterns in the .gitignore file
  *
  * @param targetDirectory The directory to scan
+ * @param options Options for the scan
+ * @param options.include An array of glob patterns to include (defaults to all files)
+ * @param options.exclude An array of glob patterns to exclude (defaults to node_modules, dist, build, bin, obj, out)
+ * @param options.excludeGitIgnore Whether to exclude files that match the .gitignore file
+ *
  * @returns An array of results containing the file path and the NCR
  */
 export async function computeNCRForRepositoryFiles(
   targetDirectory: string,
-  includeGlobPatterns = defaultIncludeGlob
+  {
+    include = ["**/*"],
+    exclude = ["node_modules", "dist", "build", "bin", "obj", "out"],
+    excludeGitIgnore = true,
+  }: { include?: string[]; exclude?: string[]; excludeGitIgnore?: boolean } = {}
 ) {
-  console.log(`Scanning for files with extensions: ${defaultIncludeGlob}`);
+  console.log(`Scanning for files with extensions: ${include}`);
 
-  const excludeGlobsPatterns = await time(readGitignoreLines)(targetDirectory);
+  exclude = [
+    ...(exclude ?? []),
+    ...(excludeGitIgnore
+      ? await time(readGitignoreLines)(targetDirectory)
+      : []),
+  ];
 
   // Read file tree recursively
   console.log(`Scanning ${targetDirectory} for files`);
@@ -72,8 +55,8 @@ export async function computeNCRForRepositoryFiles(
   const filterPaths = async (dir: string) =>
     await asyncIteratorToArray(
       getDirReader(dir, {
-        include: includeGlobPatterns,
-        exclude: excludeGlobsPatterns,
+        include,
+        exclude,
       })
     );
 
@@ -98,23 +81,22 @@ export async function computeNCRForRepositoryFiles(
     `Filtered down to ${resolvedFiles.length.toLocaleString()} files`
   );
 
-  let printProgress = false;
-  let progress = 0;
-
   return await time(calculateNormalizedCompressionRatios)(
+    targetDirectory,
     resolvedFiles.map((f) => f.fullPath)
   );
 }
 
 export async function* computeStream(
   targetDirectory: string,
-  excludeGitisnore = false
+  excludeGitisnore = false,
+  includeGlobPatterns = ["**/*"]
 ) {
   const excludeGlobsPatterns = await readGitignoreLines(targetDirectory);
   const ig = ignore().add(excludeGlobsPatterns);
 
   for await (const entry of getDirReader(targetDirectory, {
-    include: defaultIncludeGlob,
+    include: includeGlobPatterns,
     exclude: excludeGlobsPatterns,
   })) {
     if (excludeGitisnore && ig.ignores(direntToPath(entry))) {

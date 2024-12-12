@@ -13,6 +13,7 @@ import assert from "assert";
  */
 
 export async function calculateNormalizedCompressionRatios(
+  targetDirectory: string,
   filePaths: string[]
 ) {
   /** Maps file path to file content */
@@ -88,5 +89,10 @@ export async function calculateNormalizedCompressionRatios(
     };
   });
 
-  return { AR, _AR_, NCR_As };
+  return {
+    targetDirectory,
+    AR,
+    _AR_,
+    NCR_As,
+  };
 }

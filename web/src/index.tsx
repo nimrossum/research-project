@@ -7,12 +7,12 @@ import {
   type MouseEvent,
 } from "react";
 import { createRoot } from "react-dom/client";
-import type { computeNCRForRepositoryFiles } from "./compute";
+import type { computeNCRForRepositoryFiles } from "../../compute.ts";
 
 type Entry = Awaited<
   ReturnType<typeof computeNCRForRepositoryFiles>
->[number] & {
-  children: Entry[];
+>["NCR_As"][number] & {
+  children?: Entry[];
 };
 
 class EntriesStream {
@@ -36,6 +36,7 @@ class EntriesStream {
 
   async init() {
     console.log("Init");
+    // @ts-expect-error - TS doesn't know about for-await-of yet
     for await (const data of this.stream.pipeThrough(new TextDecoderStream())) {
       const newEntries: Entry[] = data
         .trim()
@@ -56,46 +57,13 @@ class EntriesStream {
   }
 }
 
-// const entries: Entry[] = [];
-// const subscribers = new Set<() => void>();
-
-// const subscribe = (fn: () => void) => {
-//   subscribers.add(fn);
-//   return () => subscribers.delete(fn);
-// };
-
-// const getEntries = () => entries;
-
-// const stream = (await fetch("./data.json")).body;
-
-// for await (const data of stream.pipeThrough(new TextDecoderStream())) {
-//   const newEntries = data
-//     .trim()
-//     .split("\n")
-//     .map((line: string) => {
-//       try {
-//         return JSON.parse(line);
-//       } catch (error) {
-//         console.error("Error parsing line", error);
-//         return null;
-//       }
-//     });
-
-//   entries.push(...newEntries);
-//   subscribers.forEach((fn) => fn());
-// }
-// if (!stream) {
-//   throw new Error("No data");
-// }
-// let i = 0;
-
 const width = window.innerWidth;
 const height = window.innerHeight;
 
 const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
 
 // function SVG({ entriesStream }: { entriesStream: EntriesStream }) {
-function SVG({ entries }: { entries: Entry[] }) {
+function SVG({ totalSize, entries }: { totalSize: number; entries: Entry[] }) {
   // const entries = useStream(entriesStream);
 
   console.log(entries);
@@ -103,8 +71,8 @@ function SVG({ entries }: { entries: Entry[] }) {
   const tmapFunc = useMemo(
     () =>
       d3
-        .treemap<Entry>()
-        .tile(d3.treemapResquarify)
+        .pack<Entry>()
+        // .tile(d3.treemapResquarify)
         .size([width, height])
         .padding(0),
     [width, height]
@@ -113,53 +81,72 @@ function SVG({ entries }: { entries: Entry[] }) {
   const nodes = useMemo(() => {
     const hierarchyRoot = d3
       .hierarchy<Entry>({
-        A: ".",
+        file: ".",
+        fileCompressionRatio: 1,
+        fractionOfRepo: 1,
+        _A_: 1,
         NCR_A: 1,
+        A: totalSize,
         children: entries,
       } satisfies Entry)
-      .sum((d) => d.NCR_A)
+      .sum((d) => d.A)
       .sort((a, b) => (b.value ?? 0) - (a.value ?? 0));
 
     const tmap = tmapFunc(hierarchyRoot);
 
-    return tmap.descendants();
+    return tmap.leaves();
   }, [entries.length]);
 
-  const gNodes = nodes.map((d) => (
-    <g
-      key={d.data.A}
-      transform={`translate(${d.x0},${d.y0})`}
-      style={{ transition: "transform 0.5s", willChange: "transform" }}
-    >
-      <rect
-        width={d.x1 - d.x0}
-        height={d.y1 - d.y0}
-        stroke={colorScale(d.data.NCR_A.toString())}
-        fill={colorScale(d.data.NCR_A.toString())}
+  const fontSize = 15;
+
+  const gNodes = nodes.map((d) => {
+    const width = d.r;
+    const height = d.r;
+
+    // const width = d.x1 - d.x0;
+    // const height = d.y1 - d.y0;
+    return (
+      <g
+        key={d.data.A}
+        transform={`translate(${d.x - d.r / 2},${d.y - d.r / 2})`}
         style={{
-          transition: "width 0.5s, height 0.5s",
-          willChange: "width, height",
+          transition: "translate 0.5s, scale 0.5s",
+          willChange: "translate scale",
         }}
-        data-entry={JSON.stringify(d.data)}
-      />
-      <text x={5} y={20} fill="white" fontSize="12px" fontFamily="Arial">
-        {d.data.A}
-      </text>
-    </g>
-  ));
+        onClick={() => {
+          console.log(d.data);
+        }}
+      >
+        <rect
+          width={width}
+          height={height}
+          r={width / 2}
+          rx={width / 2}
+          ry={width / 2}
+          stroke={colorScale(d.data.NCR_A.toString())}
+          fill={colorScale(d.data.NCR_A.toString())}
+          style={{
+            transition: "width 0.5s, height 0.5s",
+            willChange: "width, height",
+          }}
+          data-entry={JSON.stringify(d.data)}
+        />
+        <text
+          x={5}
+          y={5 + 12}
+          width={width}
+          fill="white"
+          fontSize={`${fontSize}px`}
+          fontFamily="Arial"
+        >
+          {d.data.file}
+        </text>
+      </g>
+    );
+  });
 
   return (
-    <svg
-      height={height}
-      width={width}
-      onClick={(e: MouseEvent<SVGSVGElement>) => {
-        const target = e.target as SVGElement;
-        console.log(target.tagName);
-        if (target.tagName === "rect") {
-          target.style.stroke = "black";
-        }
-      }}
-    >
+    <svg height={height} width={width}>
       {gNodes}
     </svg>
   );
@@ -188,10 +175,12 @@ const root = createRoot(document.getElementById("root")!);
 //   </Suspense>
 // );
 
-const entries = await response.json();
+const result = (await response.json()) as Awaited<
+  ReturnType<typeof computeNCRForRepositoryFiles>
+>;
 
 root.render(
   <Suspense fallback="Initializing...">
-    <SVG entries={entries} />
+    <SVG totalSize={result.AR} entries={result.NCR_As} />
   </Suspense>
 );
