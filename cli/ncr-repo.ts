@@ -20,6 +20,7 @@ const outputFormats = Object.keys(outputFormatFns);
 if (!outputFormats.includes(format)) {
   console.error(`Invalid format: ${format}`);
   console.error(`Valid formats: ${outputFormats.join(", ")}`);
+  process.exit(1);
 }
 
 outputFormatFns[format as OutputFormat](data);
