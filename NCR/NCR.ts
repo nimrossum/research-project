@@ -15,19 +15,19 @@ import assert from "assert";
 export async function calculateNormalizedCompressionRatios(
   filePaths: string[]
 ) {
-  // Maps file path to file content
+  /** Maps file path to file content */
   const ARawMap = new Map<string, Buffer>();
 
-  // Maps file path to file size
+  /** Maps file path to file size */
   const AMap = new Map<string, number>();
 
-  // Maps file path to compressed file size
+  /** Maps file path to compressed file size */
   const _A_Map = new Map<string, number>();
 
-  // Maps file path to rest of the files compressed size
+  /** Maps file path to rest of the files compressed size */
   const _R_map = new Map<string, number>();
 
-  // 1. Read all files into memory, concatenate them and calculate AR
+  // 1. Read all files into memory
   for (const f of filePaths) {
     // 1. For each file, read it into memory
     const AFile = await readFile(f);
