@@ -13,14 +13,22 @@ const targetDirectory = process.argv[2] ?? ".";
 const targetDirectoryNormalized = normalize(targetDirectory);
 const format = process.argv[3] ?? "table";
 
-console.log(`Computing stats for ${targetDirectory}`);
-const data = await computeNCRForRepositoryFiles(targetDirectoryNormalized);
-
 const outputFormats = Object.keys(outputFormatFns);
 if (!outputFormats.includes(format)) {
   console.error(`Invalid format: ${format}`);
   console.error(`Valid formats: ${outputFormats.join(", ")}`);
   process.exit(1);
 }
+
+console.log(`Computing stats for ${targetDirectory}`);
+const { AR, _AR_, NCR_As: normalizedCompressionRatios } = await computeNCRForRepositoryFiles(
+  targetDirectoryNormalized
+);
+
+const data = normalizedCompressionRatios.sort((a, b) => +a.A - +b.A);
+
+console.log(` AR : ${AR.toLocaleString()} bytes`);
+console.log(`|AR|: ${_AR_.toLocaleString()} bytes`);
+console.log(`Compression ratio for repository: ${_AR_ / AR}`);
 
 outputFormatFns[format as OutputFormat](data);

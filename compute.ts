@@ -101,15 +101,9 @@ export async function computeNCRForRepositoryFiles(
   let printProgress = false;
   let progress = 0;
 
-  const results = await time(calculateNormalizedCompressionRatios)(
+  return await time(calculateNormalizedCompressionRatios)(
     resolvedFiles.map((f) => f.fullPath)
   );
-
-  const data = await Promise.all(results).then((results) =>
-    results.sort((a, b) => +a.NCR_A - +b.NCR_A)
-  );
-
-  return data;
 }
 
 export async function* computeStream(
