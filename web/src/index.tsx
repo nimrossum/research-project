@@ -1,17 +1,12 @@
 import * as d3 from "d3";
-import {
-  Suspense,
-  useDeferredValue,
-  useMemo,
-  useSyncExternalStore,
-} from "react";
+import { useDeferredValue, useMemo, useSyncExternalStore } from "react";
 import { createRoot } from "react-dom/client";
 import type { computeNCRForRepositoryFiles } from "../../compute.ts";
 
 type Entry = Awaited<
   ReturnType<typeof computeNCRForRepositoryFiles>
 >["NCR_As"][number] & {
-  children?: Entry[];
+  children: Entry[];
 };
 
 class EntriesStream {
@@ -59,35 +54,51 @@ class EntriesStream {
 const windowWidth = window.innerWidth;
 const windowHeight = window.innerHeight;
 
-const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
-
 type SVGEntry = {
   id: string;
   label: string;
-  value: number;
-  children?: SVGEntry[];
+  sizeValue: number;
+  colorValue: number;
+  children: SVGEntry[];
 };
-// function SVG({ entriesStream }: { entriesStream: EntriesStream }) {
+
 function SVG({
   rootId,
-  totalSize,
+  sizeSum,
+  colorSum,
   entries,
 }: {
   rootId: string;
-  totalSize: number;
+  sizeSum: number;
+  colorSum: number;
   entries: SVGEntry[];
 }) {
+  const fontSize = 15;
+  const basePadding = 10;
+  const sizeMin = Math.min(...entries.map((x) => x.sizeValue));
+  const sizeMax = Math.max(...entries.map((x) => x.sizeValue));
+  const colorMin = Math.min(...entries.map((x) => x.colorValue));
+  const colorMax = Math.max(...entries.map((x) => x.colorValue));
+
+  console.log({ sizeMin, sizeMax, colorMin, colorMax });
+
+  const colorScale = d3
+    .scaleSequential(d3.interpolateBlues)
+    .domain([colorMin, colorMax]);
+
   // const entries = useStream(entriesStream);
 
   console.log(entries);
 
-  const tmapFunc = useMemo(
+  const packingFunction = useMemo(
     () =>
       d3
         .treemap<SVGEntry>()
         .tile(d3.treemapResquarify)
-        .size([windowWidth, windowHeight])
-        .padding(0),
+        .paddingInner(basePadding)
+        .paddingOuter(basePadding)
+        .paddingTop(basePadding + fontSize)
+        .size([windowWidth, windowHeight]),
     [windowWidth, windowHeight]
   );
 
@@ -96,18 +107,17 @@ function SVG({
       .hierarchy<SVGEntry>({
         id: rootId,
         label: ".",
-        value: totalSize,
+        sizeValue: 0,
+        colorValue: 0,
         children: entries,
       } satisfies SVGEntry)
-      .sum((d) => d.value)
-      .sort((a, b) => (b.value ?? 0) - (a.value ?? 0));
+      .sum((d) => d.sizeValue)
+      .sort((a, b) => (a.value ?? 0) - (b.value ?? 0));
 
-    const tmap = tmapFunc(hierarchyRoot);
+    const tmap = packingFunction(hierarchyRoot);
 
-    return tmap.leaves();
+    return tmap.descendants();
   }, [entries.length]);
-
-  const fontSize = 15;
 
   const gNodes = nodes.map((d) => {
     const width = d.x1 - d.x0;
@@ -117,33 +127,30 @@ function SVG({
         key={d.data.id}
         width={width}
         height={height}
-        // x={d.x0}
-        // y={d.y0}
         transform={`translate(${d.x0},${d.y0})`}
+        onClick={(e) => {
+          e.currentTarget.style.opacity = "0";
+        }}
       >
         <rect
-          style={{
-            transition: "all 300ms",
-            willChange: "translate scale width",
-          }}
-          stroke={colorScale(d.data.value.toString())}
-          fill={colorScale(d.data.value.toString())}
+          className={d.data.children.length === 0 ? "leaf" : "branch"}
           width={width}
           height={height}
-          onClick={() => {
-            console.log(d.data);
-          }}
+          {...(d.data.children.length === 0
+            ? // Leaf node dynamic styles
+              {
+                fill: colorScale(d.data.colorValue),
+                stroke: colorScale(d.data.colorValue),
+              }
+            : // Branch node dynamic styles
+              {})}
           data-entry={JSON.stringify(d.data)}
         />
-        <text
-          x={5}
-          y={5 + 12}
-          width={width}
-          fill="white"
-          fontSize={`${fontSize}px`}
-          fontFamily="Arial"
-        >
-          {d.data.label}
+        {/* Text background square */}
+        <rect x={0} y={0} width={width} height={fontSize * 1.5} fill="white" />
+        <text x={5} y={5 + 12} width={width} fontSize={`${fontSize}px`}>
+          {d.data.label} (sizeValue: {d.data.sizeValue.toFixed(2)}, colorValue:
+          {d.data.colorValue.toFixed(2)})
         </text>
       </g>
     );
@@ -187,20 +194,28 @@ const result = (await response.json()) as Awaited<
   ReturnType<typeof computeNCRForRepositoryFiles>
 >;
 
+const sizeProperty: keyof (typeof result)["NCR_As"][number] = "A";
+const colorProperty: keyof (typeof result)["NCR_As"][number] = "NCR_A";
+const sizeSum = result.NCR_As.reduce((acc, x) => acc + x[sizeProperty], 0);
+const colorSum = result.NCR_As.reduce((acc, x) => acc + x[colorProperty], 0);
+
 root.render(
-  <Suspense fallback="Initializing...">
-    <SVG
-      rootId={result.targetDirectory}
-      totalSize={result.AR}
-      entries={result.NCR_As.map((x) => ({
-        id: x.file,
-        label: x.file.replace(result.targetDirectory, ""),
-        value: x.A,
-      }))}
-    />
-  </Suspense>
+  // <Suspense fallback="Initializing...">
+  <SVG
+    rootId={result.targetDirectory}
+    sizeSum={sizeSum}
+    colorSum={colorSum}
+    entries={result.NCR_As.map((x) => ({
+      id: x.file,
+      label: x.file.replace(result.targetDirectory, "."),
+      sizeValue: x[sizeProperty],
+      colorValue: x[colorProperty],
+      children: [],
+    }))}
+  />
+  // </Suspense>
 );
 
-setTimeout(() => {
-  window.location.reload();
-}, 2000);
+// setTimeout(() => {
+//   window.location.reload();
+// }, 2000);
