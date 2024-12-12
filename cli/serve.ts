@@ -1,7 +1,7 @@
 #!/usr/bin/env node --experimental-strip-types
 
-import { join, normalize, resolve } from "node:path";
-import { computeNCRForRepositoryFiles, computeStream } from "../compute.ts";
+import { normalize, resolve } from "node:path";
+import { computeNCRForRepositoryFiles } from "../compute.ts";
 import express from "express";
 
 const app = express();
