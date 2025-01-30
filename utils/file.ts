@@ -1,23 +1,48 @@
 import type { Dirent } from "fs";
 import ignore from "ignore";
 import { glob } from "node:fs/promises";
-import { join } from "path/posix";
+import isBinaryPath from "is-binary-path";
 
-export function getDirReader(
+import { join, relative } from "node:path";
+
+export async function* getDirReader(
   dir: string,
-  {
-    include: includeGlobs,
-    exclude: excludeGlobs,
-  }: { include: string | string[]; exclude: string | string[] }
-) {
-  const ig = ignore().add(excludeGlobs);
-  return glob(includeGlobs, {
+  options: { include: string | string[]; exclude: string | string[] }
+): AsyncGenerator<Dirent> {
+  const { include, exclude } = options;
+  const excluder = ignore().add(exclude);
+  const includer = ignore().add(include);
+
+  const entries = glob("**/*", {
     cwd: dir,
     withFileTypes: true,
-    exclude(fileName) {
-      return fileName.isDirectory() || ig.ignores(fileName.name);
+    exclude(dirent) {
+      if (dirent.isDirectory()) {
+        return false;
+      }
+      const absolutePath = join(dirent.parentPath, dirent.name);
+      const relativePath = relative(dir, absolutePath);
+      return excluder.ignores(relativePath);
     },
   });
+
+  for await (const dirent of entries) {
+    if (dirent.isDirectory()) {
+      continue;
+    }
+
+    const absolutePath = join(dirent.parentPath, dirent.name);
+    const relativePath = relative(dir, absolutePath);
+
+    if (isBinaryPath(absolutePath)) {
+      continue;
+    }
+
+    if (!includer.ignores(relativePath)) {
+      yield dirent;
+    }
+  }
 }
+
 export const direntToPath = (dirent: Dirent) =>
   join(dirent.parentPath, dirent.name);
