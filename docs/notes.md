@@ -49,3 +49,7 @@ My hypothesis is that this will be similar to the NCD, but faster to compute, si
 
 - Ignore uninteresting files, such as `package-lock.json` etc. or only focus on specific file extensions, or a specific file
 
+## Meeting with Mircea
+
+- [ ] ## How much do I write in the report?
+-
