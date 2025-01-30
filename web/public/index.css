@@ -1,0 +1,34 @@
+body {
+  margin: 0;
+}
+body,
+#root {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.color {
+  height: 30px;
+  background-image: url("./blues.png");
+  background-repeat: repeat-y;
+}
+g {
+  transition: all 300ms;
+  will-change: translate scale width;
+}
+g:hover {
+  opacity: 0.8;
+}
+rect {
+  stroke-width: 6px;
+}
+rect.branch {
+  fill: transparent;
+  stroke: black;
+}
+text {
+  fill: green;
+  font-weight: bold;
+  font-family: sans-serif;
+  text-overflow: clip;
+}

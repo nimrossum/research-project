@@ -1,4 +1,4 @@
-import { readFile, stat, glob } from "node:fs/promises";
+import { readFile, stat } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import ignore from "ignore";
 import { time } from "./utils/misc.ts";
@@ -67,7 +67,8 @@ const defaultInclude = join("**", `*.{${includeExtensions.join(",")}}`);
 export async function computeNCDForRepositoryFiles(
   targetDirectory: string,
   {
-    include = ["**/*"],
+    // include = ["**/*"],
+    include = [defaultInclude],
     exclude = [
       "node_modules",
       "dist",
@@ -109,29 +110,15 @@ export async function computeNCDForRepositoryFiles(
   const length = entries.length;
   console.log(`✅ Found ${length.toLocaleString()} files`);
 
-  const mapEntriesToAbsolutePaths = (
-    targetDirectory: string,
-    entries: string[]
-  ) =>
-    entries.map((relativePath) => ({
-      relativePath,
-      fullPath: resolve(targetDirectory, relativePath),
-    }));
-
-  const resolvedFiles = mapEntriesToAbsolutePaths(
-    targetDirectory,
-    entries.map(direntToPath)
-  );
-
   return await calculateNormalizedCompressionDistances(
     targetDirectory,
-    resolvedFiles.map((f) => f.fullPath)
+    entries
   );
 }
 
 export async function* computeStream(
   targetDirectory: string,
-  excludeGitisnore = false,
+  excludeGitignore = true,
   includeGlobPatterns = ["**/*"]
 ) {
   const excludeGlobsPatterns = await readGitignoreLines(targetDirectory);
@@ -141,14 +128,14 @@ export async function* computeStream(
     include: includeGlobPatterns,
     exclude: excludeGlobsPatterns,
   })) {
-    if (excludeGitisnore && ig.ignores(direntToPath(entry))) {
-      // continue
+    if (excludeGitignore && ig.ignores(entry)) {
+      continue;
     }
-    const absoluteFilePath = direntToPath(entry);
+
     yield JSON.stringify({
-      absolutePath: absoluteFilePath,
+      absolutePath: entry,
       relativePath: entry,
-      size: (await stat(absoluteFilePath)).size,
+      size: (await stat(entry)).size,
       children: [],
     }) + "\n";
   }

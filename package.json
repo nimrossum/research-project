@@ -8,15 +8,12 @@
     "compress": "cli/compress.ts"
   },
   "scripts": {
-    "start": "node --run build && node --run serve",
-    "ncr-repo": "node --experimental-strip-types --no-warnings cli/ncr-repo.ts",
-    "compress": "node --experimental-strip-types --no-warnings cli/compress.ts",
-    "serve": "node --experimental-strip-types --no-warnings cli/serve.ts",
-    "serve:watch": "node --watch --experimental-strip-types --no-warnings cli/serve.ts",
-    "test": "node --experimental-strip-types --no-warnings --test",
-    "build": "esbuild web/src/index.tsx --format=esm --bundle --outfile=build/module.js",
-    "build:watch": "esbuild --watch web/src/index.tsx --format=esm --bundle --outfile=build/module.js",
-    "build:prod": "esbuild web/src/index.tsx --format=esm --minify --bundle --outfile=build/module.js"
+    "start": "bun --run serve",
+    "ncr-repo": "bun cli/ncr-repo.ts",
+    "compress": "bun cli/compress.ts",
+    "serve": "bun cli/serve.ts",
+    "serve:watch": "bun --watch cli/serve.ts",
+    "test": "bun --test"
   },
   "peerDependencies": {
     "typescript": "^5.7.2"
@@ -24,11 +21,10 @@
   "dependencies": {
     "@mongodb-js/zstd": "^2.0.0",
     "@types/d3": "^7.4.3",
-    "@types/node": "^22.10.1",
     "@types/react": "^19.0.1",
     "@types/react-dom": "^19.0.2",
+    "bun-plugin-tailwind": "^0.0.14",
     "d3": "^7.9.0",
-    "express": "^5.0.1",
     "ignore": "^6.0.2",
     "is-binary-path": "^3.0.0",
     "react": "^19.0.0",
@@ -39,7 +35,6 @@
     "@mongodb-js/zstd"
   ],
   "devDependencies": {
-    "@types/express": "^5.0.0",
-    "esbuild": "^0.24.0"
+    "@types/bun": "^1.2.1"
   }
 }

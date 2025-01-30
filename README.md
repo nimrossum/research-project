@@ -1,26 +1,17 @@
 # research-project
 
-To run this project, you need to have [Node.js](https://nodejs.org) installed.
+To run this project, you need to have [Bun](https://bun.sh) installed.
 
-Tested with Node.js version 23.3.0
-
-If you have NVM installed, you can run:
-
-```bash
-nvm install 23.3.0
-nvm use 23.3.0
-```
+Tested with Node.js version 1.2.1
 
 To install dependencies:
 
 ```bash
-npm install
+bun install
 ```
 
 To run NCD and show a treemap on http://localhost:3000
 
 ```bash
-npm start
+bun serve <path to project>
 ```
-
-T

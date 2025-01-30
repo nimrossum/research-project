@@ -3,46 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="tailwindcss" />
+    <link rel="stylesheet" href="index.css" />
     <title>Code Complexity</title>
-    <style>
-      body {
-        margin: 0;
-      }
-      body,
-      #root {
-        position: absolute;
-        inset: 0;
-        overflow: hidden;
-      }
-      .color {
-        height: 30px;
-        background-image: url("./blues.png");
-        background-repeat: repeat-y;
-      }
-      g {
-        transition: all 300ms;
-        will-change: translate scale width;
-      }
-      g:hover {
-        opacity: 0.8;
-      }
-      rect {
-        stroke-width: 6px;
-      }
-      rect.branch {
-        fill: transparent;
-        stroke: black;
-      }
-      text {
-        fill: green;
-        font-weight: bold;
-        font-family: sans-serif;
-        text-overflow: clip;
-      }
-    </style>
   </head>
   <body>
-    <script type="module" src="/module.js"></script>
+    <script type="module" src="../src/index.tsx"></script>
     <div id="root"></div>
   </body>
 </html>
