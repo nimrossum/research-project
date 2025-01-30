@@ -1,11 +1,11 @@
 import * as d3 from "d3";
 import { useDeferredValue, useMemo, useSyncExternalStore } from "react";
 import { createRoot } from "react-dom/client";
-import type { computeNCRForRepositoryFiles } from "../../compute.ts";
+import type { computeNCDForRepositoryFiles } from "../../compute.ts";
 
 type Entry = Awaited<
-  ReturnType<typeof computeNCRForRepositoryFiles>
->["NCR_As"][number] & {
+  ReturnType<typeof computeNCDForRepositoryFiles>
+>["NCD_As"][number] & {
   children: Entry[];
 };
 
@@ -52,7 +52,7 @@ class EntriesStream {
 }
 
 const windowWidth = window.innerWidth;
-const windowHeight = window.innerHeight;
+const windowHeight = window.innerHeight - 200;
 
 type SVGEntry = {
   id: string;
@@ -147,10 +147,21 @@ function SVG({
           data-entry={JSON.stringify(d.data)}
         />
         {/* Text background square */}
-        <rect x={0} y={0} width={width} height={fontSize * 1.5} fill="white" />
+        <rect
+          x={0}
+          y={0}
+          width={width}
+          height={fontSize * 1.5 * 3}
+          fill="#ffffff55"
+        />
         <text x={5} y={5 + 12} width={width} fontSize={`${fontSize}px`}>
-          {d.data.label} (sizeValue: {d.data.sizeValue.toFixed(2)}, colorValue:
-          {d.data.colorValue.toFixed(2)})
+          {d.data.label}
+        </text>
+        <text x={5} y={(5 + 12) * 2} width={width} fontSize={`${fontSize}px`}>
+          size: {d.data.sizeValue.toFixed(4)}
+        </text>
+        <text x={5} y={(5 + 12) * 3} width={width} fontSize={`${fontSize}px`}>
+          NCD: {d.data.colorValue.toFixed(4)}
         </text>
       </g>
     );
@@ -191,29 +202,55 @@ const root = createRoot(document.getElementById("root")!);
 // );
 
 const result = (await response.json()) as Awaited<
-  ReturnType<typeof computeNCRForRepositoryFiles>
+  ReturnType<typeof computeNCDForRepositoryFiles>
 >;
 
-const sizeProperty: keyof (typeof result)["NCR_As"][number] = "A";
-const colorProperty: keyof (typeof result)["NCR_As"][number] = "NCR_A";
-const sizeSum = result.NCR_As.reduce((acc, x) => acc + x[sizeProperty], 0);
-const colorSum = result.NCR_As.reduce((acc, x) => acc + x[colorProperty], 0);
+const sizeProperty: keyof (typeof result)["NCD_As"][number] = "A";
+const colorProperty: keyof (typeof result)["NCD_As"][number] = "NCD_A";
+const sizeSum = result.NCD_As.reduce((acc, x) => acc + x[sizeProperty], 0);
+const colorSum = result.NCD_As.reduce((acc, x) => acc + x[colorProperty], 0);
 
 root.render(
-  // <Suspense fallback="Initializing...">
-  <SVG
-    rootId={result.targetDirectory}
-    sizeSum={sizeSum}
-    colorSum={colorSum}
-    entries={result.NCR_As.map((x) => ({
-      id: x.file,
-      label: x.file.replace(result.targetDirectory, "."),
-      sizeValue: x[sizeProperty],
-      colorValue: x[colorProperty],
-      children: [],
-    }))}
-  />
-  // </Suspense>
+  <>
+    <SVG
+      rootId={result.targetDirectory}
+      sizeSum={sizeSum}
+      colorSum={colorSum}
+      entries={result.NCD_As.map((x) => ({
+        id: x.file,
+        label: x.file.replace(result.targetDirectory, "."),
+        sizeValue: x[sizeProperty],
+        colorValue: x[colorProperty],
+        children: [],
+      }))}
+    />
+    <div className="legend">
+      <span>Size: {sizeProperty}</span>
+      <span>Color: {colorProperty}</span>
+      <div
+        style={{
+          width: "256px",
+          display: "flex",
+          flexDirection: "row",
+          justifyContent: "space-between",
+        }}
+      >
+        <span>Low NCD</span>
+        <span>High NCD</span>
+      </div>
+      <div
+        className="color"
+        style={{
+          width: "100%",
+        }}
+      ></div>
+    </div>
+    <div>
+      <p>AR: {result.AR}</p>
+      <p>|AR|: {result._AR_}</p>
+      <p>Compression ratio for repository: {result._AR_ / result.AR}</p>
+    </div>
+  </>
 );
 
 // setTimeout(() => {

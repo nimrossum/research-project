@@ -6,9 +6,9 @@ export function time<A extends readonly unknown[], R>(
     const result = fn(...args);
     const end = performance.now();
     console.log(
-      `[${fn.name.length > 0 ? fn.name : "anonymous"}] ${(end - start).toFixed(
-        2
-      )}ms`
+      `⏳ ${(
+        end - start
+      ).toFixed(2)}ms [${fn.name.length > 0 ? fn.name : "anonymous"}]`
     );
     return result;
   };

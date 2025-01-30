@@ -1,7 +1,7 @@
 #!/usr/bin/env node --experimental-strip-types
 
 import { normalize, resolve } from "node:path";
-import { computeNCRForRepositoryFiles } from "../compute.ts";
+import { computeNCDForRepositoryFiles } from "../compute.ts";
 import express from "express";
 
 const app = express();
@@ -15,18 +15,18 @@ const targetDirectoryNormalized = resolve(normalize(targetDirectory));
 const includeGlobs = process.argv[3] ? [process.argv[3]] : undefined;
 const excludeGlobs = process.argv[4] ? [process.argv[4]] : undefined;
 
+const dataPromise = computeNCDForRepositoryFiles(targetDirectoryNormalized, {
+  include: includeGlobs,
+  exclude: excludeGlobs,
+});
+
 app.use(async (req, res, next) => {
   if (req.path === "/data.json") {
-    res.json(
-      await computeNCRForRepositoryFiles(targetDirectoryNormalized, {
-        include: includeGlobs,
-        exclude: excludeGlobs,
-      })
-    );
+    res.json(await dataPromise);
   } else {
     next();
   }
 });
 const server = app.listen(3000);
 
-console.log(`Serving ${targetDirectoryNormalized} on http://localhost:3000`);
+console.log(`✅ Serving ${targetDirectoryNormalized} on http://localhost:3000`);

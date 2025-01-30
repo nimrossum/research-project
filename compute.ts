@@ -4,7 +4,7 @@ import ignore from "ignore";
 import { time } from "./utils/misc.ts";
 import { asyncIteratorToArray } from "./utils/iterator.ts";
 import { direntToPath } from "./utils/file.ts";
-import { calculateNormalizedCompressionRatios } from "./NCR/ncr.ts";
+import { calculateNormalizedCompressionDistances } from "./NCD/ncd.ts";
 import { getDirReader } from "./utils/file.ts";
 
 async function readGitignoreLines(targetDirectory: string) {
@@ -19,6 +19,38 @@ async function readGitignoreLines(targetDirectory: string) {
   }
 }
 
+const includeExtensions = [
+  "ts",
+  "js",
+  "json",
+  "md",
+  "html",
+  "css",
+  "scss",
+  "sass",
+  "less",
+  "cs",
+  "java",
+  "py",
+  "go",
+  "rb",
+  "php",
+  "c",
+  "cpp",
+  "h",
+  "hpp",
+  "cshtml",
+  "xml",
+  "yml",
+  "yaml",
+  "toml",
+  "sh",
+  "bat",
+  "ps1",
+];
+
+const defaultInclude = join("**", `*.{${includeExtensions.join(",")}}`);
+
 /**
  * Compute the normalized compression ratio for all code files
  * (according to the include extensions) in a directory,
@@ -30,28 +62,41 @@ async function readGitignoreLines(targetDirectory: string) {
  * @param options.exclude An array of glob patterns to exclude (defaults to node_modules, dist, build, bin, obj, out)
  * @param options.excludeGitIgnore Whether to exclude files that match the .gitignore file
  *
- * @returns An array of results containing the file path and the NCR
+ * @returns An array of results containing the file path and the NCD
  */
-export async function computeNCRForRepositoryFiles(
+export async function computeNCDForRepositoryFiles(
   targetDirectory: string,
   {
     include = ["**/*"],
-    exclude = ["node_modules", "dist", "build", "bin", "obj", "out"],
+    exclude = [
+      "node_modules",
+      "dist",
+      "build",
+      "bin",
+      "obj",
+      "out",
+      "PackageCache",
+      "cache",
+      "datasets",
+      "data",
+      "*.csv",
+      "*.sqlite",
+      "*.bin",
+    ],
     excludeGitIgnore = true,
   }: { include?: string[]; exclude?: string[]; excludeGitIgnore?: boolean } = {}
 ) {
-  console.log(`Scanning for files with extensions: ${include}`);
-
   exclude = [
     ...(exclude ?? []),
     ...(excludeGitIgnore
       ? await time(readGitignoreLines)(targetDirectory)
       : []),
   ];
+  console.log(
+    `👉 Scanning ${targetDirectory} for files with extensions: ${include}, excluding: ${exclude}`
+  );
 
   // Read file tree recursively
-  console.log(`Scanning ${targetDirectory} for files`);
-
   const filterPaths = async (dir: string) =>
     await asyncIteratorToArray(
       getDirReader(dir, {
@@ -62,7 +107,7 @@ export async function computeNCRForRepositoryFiles(
 
   const entries = await time(filterPaths)(targetDirectory);
   const length = entries.length;
-  console.log(`Found ${length.toLocaleString()} files`);
+  console.log(`✅ Found ${length.toLocaleString()} files`);
 
   const mapEntriesToAbsolutePaths = (
     targetDirectory: string,
@@ -73,15 +118,12 @@ export async function computeNCRForRepositoryFiles(
       fullPath: resolve(targetDirectory, relativePath),
     }));
 
-  const resolvedFiles = time(
-    mapEntriesToAbsolutePaths // Resolve to full path
-  )(targetDirectory, entries.map(direntToPath));
-
-  console.log(
-    `Filtered down to ${resolvedFiles.length.toLocaleString()} files`
+  const resolvedFiles = mapEntriesToAbsolutePaths(
+    targetDirectory,
+    entries.map(direntToPath)
   );
 
-  return await time(calculateNormalizedCompressionRatios)(
+  return await calculateNormalizedCompressionDistances(
     targetDirectory,
     resolvedFiles.map((f) => f.fullPath)
   );

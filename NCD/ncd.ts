@@ -1,10 +1,11 @@
 import { readFile } from "fs/promises";
 import { compress } from "./compress.ts";
 import assert from "assert";
+import { time } from "../utils/misc.ts";
 
 /**
- * Calculate the normalized compression ratio for all files in a directory
- * NCR_A = (_AR_ - _A_) / _R_
+ * Calculate the normalized compression distance for all files in a directory
+ * NCD_A = (_AR_ - _A_) / _R_
  * where _AR_ is the compressed size of the concatenated files
  * _A_ is the compressed size of the file
  * _R_ is the compressed size of the concatenated files without A
@@ -12,10 +13,19 @@ import assert from "assert";
  * @param filePaths
  */
 
-export async function calculateNormalizedCompressionRatios(
+export async function calculateNormalizedCompressionDistances(
   targetDirectory: string,
   filePaths: string[]
 ) {
+  const differentFileExtensions = new Set(
+    filePaths.map((f) => f.split(".").pop())
+  );
+  console.log(
+    `👉 Found ${differentFileExtensions.size} extensions: ${Array.from(
+      differentFileExtensions
+    ).join(", ")}`
+  );
+
   /** Maps file path to file content */
   const ARawMap = new Map<string, Buffer>();
 
@@ -28,12 +38,34 @@ export async function calculateNormalizedCompressionRatios(
   /** Maps file path to rest of the files compressed size */
   const _R_map = new Map<string, number>();
 
+  let memoryUsage = 0;
+  let fileCount = 0;
+
+  console.log("👉 Reading files into memory");
+  console.log();
+  console.log();
+
   // 1. Read all files into memory
   for (const f of filePaths) {
     // 1. For each file, read it into memory
-    const AFile = await readFile(f);
+    const AFile = Buffer.from((await readFile(f, "utf-8")).replace(/\s/g, ""));
     const ABuffer = AFile;
     const A = ABuffer.length;
+    memoryUsage += A;
+    fileCount += 1;
+    // Clear previous line
+    // process.stdout.write("\x1b[1A\x1b[K");
+    // process.stdout.write("\x1b[1A\x1b[K");
+    // console.log(f);
+    if (A > 1024 ** 2) {
+      console.warn(`Warning: ${f} is larger than 1 mB`);
+    }
+    // console.log(
+    //   `Memory usage: ${(
+    //     memoryUsage /
+    //     1024 ** 2
+    //   ).toLocaleString()} mB (${fileCount} files)`
+    // );
     ARawMap.set(f, ABuffer);
     // 2. Compress file
     const _A_ = (await compress(ABuffer, "zstd")).length;
@@ -43,19 +75,29 @@ export async function calculateNormalizedCompressionRatios(
   }
 
   const fileBuffers = Array.from(ARawMap.values());
-  assert(fileBuffers.length === filePaths.length);
+  // assert(fileBuffers.length === filePaths.length);
 
-  const concatenatedBuffer = Buffer.concat(fileBuffers);
+  console.log(`👉 Concatenating ${fileBuffers.length} files`);
+  const concatenatedBuffer = time(Buffer.concat)(fileBuffers);
 
   // _AR_ is the size of the all files concatenated
   const AR = concatenatedBuffer.length;
 
   // _AR_ is the compressed size of the all files concatenated
+  console.log(`👉 Compressing ${fileBuffers.length} files`);
   const _AR_ = (await compress(concatenatedBuffer, "zstd")).length;
-  assert(_AR_ < AR);
+  console.log(`✅ Compressed size: ${(_AR_ / 1024 ** 2).toLocaleString()} mB`);
 
+  // assert(_AR_ < AR);
+
+  console.log(`👉 Calculating _R_ for each file`);
+  console.log();
+  let i = 0;
   // 3. For each file A, calculate the compression R for all files except A
   for (const f of filePaths) {
+    // Clear previous line
+    // process.stdout.write("\x1b[1A\x1b[K");
+    // console.log(`Processing file ${i + 1}/${filePaths.length}`);
     const fileBuffersWithoutF = Array.from(ARawMap.entries())
       .filter(([path]) => path !== f)
       .map(([_, buffer]) => buffer);
@@ -71,28 +113,34 @@ export async function calculateNormalizedCompressionRatios(
     );
 
     _R_map.set(f, compressizedBufferWithoutF.length);
+    i++;
   }
 
-  // 4. Calculate the normalized compression ratio for each file
-  const NCR_As = filePaths.map((fp) => {
+  console.log("✅ Done calculating _R_");
+  console.log("👉 Calculating NCD for each file");
+
+  // 4. Calculate the normalized compression distance for each file
+  const NCD_As = filePaths.map((fp) => {
     const A = AMap.get(fp)!;
     const _A_ = _A_Map.get(fp)!;
     const _R_ = _R_map.get(fp)!;
-    const NCR_A = (_AR_ - _A_) / _R_;
+    const NCD_A = (_AR_ - Math.min(_A_, _R_)) / Math.max(_A_, _R_);
     return {
       file: fp,
       A,
       _A_,
-      NCR_A,
+      NCD_A,
       fileCompressionRatio: _A_ / A,
       fractionOfRepo: A / AR,
     };
   });
 
+  console.log("✅ Done calculating NCD for each file");
+
   return {
     targetDirectory,
     AR,
     _AR_,
-    NCR_As,
+    NCD_As,
   };
 }

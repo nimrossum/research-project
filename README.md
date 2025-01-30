@@ -17,7 +17,7 @@ To install dependencies:
 npm install
 ```
 
-To run NCR and show a treemap on http://localhost:3000
+To run NCD and show a treemap on http://localhost:3000
 
 ```bash
 npm start
