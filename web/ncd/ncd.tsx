@@ -1,16 +1,6 @@
 import { useDeferredValue, useSyncExternalStore } from "react";
 import { createRoot } from "react-dom/client";
 import { Treemap } from "@/lib/Treemap.tsx";
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableFooter,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "web/lib/ui/table.tsx";
 import { computeNCDForRepositoryFiles } from "compute.ts";
 
 type Entry = Awaited<
