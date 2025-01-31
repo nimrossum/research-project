@@ -24,10 +24,13 @@ export function Treemap({
   const windowHeight = window.innerHeight - 200;
   const fontSize = 15;
   const basePadding = 10;
-  const sizeMin = Math.min(...entries.map((x) => x.sizeValue));
-  const sizeMax = Math.max(...entries.map((x) => x.sizeValue));
-  const colorMin = Math.min(...entries.map((x) => x.colorValue));
-  const colorMax = Math.max(...entries.map((x) => x.colorValue));
+
+  const sizeValues = entries.map((x) => x.sizeValue);
+  const colorValues = entries.map((x) => x.colorValue);
+  const sizeMin = Math.min(...sizeValues);
+  const sizeMax = Math.max(...sizeValues);
+  const colorMin = Math.min(...colorValues);
+  const colorMax = Math.max(...colorValues);
 
   console.log({ sizeMin, sizeMax, colorMin, colorMax });
 
