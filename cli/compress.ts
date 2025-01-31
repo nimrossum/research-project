@@ -1,7 +1,7 @@
 #!/usr/bin/env node --experimental-strip-types
 
 import { readFileSync } from "fs";
-import { compress } from "../NCD/compress.ts";
+import { compress } from "@/NCD/compress.ts";
 
 if (process.stdin.isTTY) {
   console.log("Pipe something into this command to measure compression ratio");

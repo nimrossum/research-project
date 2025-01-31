@@ -1,7 +1,7 @@
 import { readFile } from "fs/promises";
 import { compress } from "./compress.ts";
 import assert from "assert";
-import { time } from "../utils/misc.ts";
+import { time } from "@/utils/misc.ts";
 
 /**
  * Calculate the normalized compression distance for all files in a directory

@@ -32,7 +32,7 @@
     "erasableSyntaxOnly": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./web/*"]
+      "@/*": ["./*"]
     }
   }
 }

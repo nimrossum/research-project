@@ -1,7 +1,7 @@
 #!/usr/bin/env node --experimental-strip-types
 
 import { normalize } from "node:path";
-import { computeNCDForRepositoryFiles } from "../compute.ts";
+import { computeNCDForRepositoryFiles } from "@/compute.ts";
 
 const outputFormatFns = {
   table: console.table,

@@ -1,7 +1,7 @@
 #!/usr/bin/env node --experimental-strip-types
 
-import app from "../web/index.html";
-import ncd from "../web/ncd/index.html";
+import app from "@/web/index.html";
+import ncd from "@/web/ncd/index.html";
 import { join, normalize, resolve } from "node:path";
 import { computeNCDForRepositoryFiles } from "../compute.ts";
 import { serve } from "bun";
