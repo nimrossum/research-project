@@ -1,35 +1,45 @@
 #!/usr/bin/env node --experimental-strip-types
 
-import app from "../web/public/index.html";
-import { normalize, resolve } from "node:path";
+import app from "../web/index.html";
+import ncd from "../web/ncd/index.html";
+import { join, normalize, resolve } from "node:path";
 import { computeNCDForRepositoryFiles } from "../compute.ts";
 import { serve } from "bun";
 
-serve({
+if (process.argv[2] === "--help" || process.argv[2] === "-h") {
+  console.log(`Usage: serve.ts [directory] [exclude] [include]`);
+  process.exit(0);
+}
+
+const server = serve({
   static: {
     "/": app,
-    
+    "/ncd": ncd,
   },
   async fetch(req: Request) {
-    const targetDirectory = process.argv[2] ?? ".";
-    const targetDirectoryNormalized = resolve(normalize(targetDirectory));
-
-    const includeGlobs = process.argv[3] ? [process.argv[3]] : undefined;
-    const excludeGlobs = process.argv[4] ? [process.argv[4]] : undefined;
-
-    const dataPromise = computeNCDForRepositoryFiles(
-      targetDirectoryNormalized,
-      {
-        include: includeGlobs,
-        exclude: excludeGlobs,
-      }
-    );
     const url = new URL(req.url);
     switch (url.pathname) {
       case "/data.json": {
+        const targetDirectory = process.argv[2] ?? ".";
+        const targetDirectoryNormalized = resolve(normalize(targetDirectory));
+
+        const excludeGlobs = process.argv[3] ? [process.argv[3]] : undefined;
+        const includeGlobs = process.argv[4] ? [process.argv[4]] : undefined;
+
+        const dataPromise = computeNCDForRepositoryFiles(
+          targetDirectoryNormalized,
+          {
+            exclude: excludeGlobs,
+            include: includeGlobs,
+          }
+        );
         return Response.json(await dataPromise);
       }
       default: {
+        if (url.pathname.startsWith("/static")) {
+          const path = join("./web", url.pathname);
+          return new Response(await Bun.file(path).bytes());
+        }
         return new Response("Not found: " + req.url, {
           status: 404,
           statusText: "Not Found",
@@ -38,6 +48,8 @@ serve({
     }
   },
 });
+
+console.log(`✅ Serving on ${server.url}`);
 
 // const app = express();
 

@@ -26,7 +26,14 @@
 
     // Custom settings
     "noUncheckedIndexedAccess": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+
+    // Custom settings
+    "erasableSyntaxOnly": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./web/*"]
+    }
   }
 }
 

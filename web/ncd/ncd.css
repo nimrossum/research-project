@@ -1,17 +1,12 @@
-@import "tailwindcss";
-
-body {
-  margin: 0;
-}
 body,
 #root {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
+  /* position: absolute; */
+  /* inset: 0; */
+  /* overflow: hidden; */
 }
 .color {
   height: 30px;
-  background-image: url("./blues.png");
+  background-image: url("./../static/blues.png");
   background-repeat: repeat-y;
 }
 g {

@@ -1,7 +1,17 @@
 import { useDeferredValue, useSyncExternalStore } from "react";
 import { createRoot } from "react-dom/client";
-import type { computeNCDForRepositoryFiles } from "../../compute.ts";
-import { Treemap } from "./Treemap.tsx";
+import { Treemap } from "@/lib/Treemap.tsx";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "web/lib/ui/table.tsx";
+import { computeNCDForRepositoryFiles } from "compute.ts";
 
 type Entry = Awaited<
   ReturnType<typeof computeNCDForRepositoryFiles>
@@ -118,7 +128,7 @@ root.render(
         }}
       ></div>
     </div>
-    <div>
+    <div className="grid">
       <p>AR: {result.AR}</p>
       <p>|AR|: {result._AR_}</p>
       <p>Compression ratio for repository: {result._AR_ / result.AR}</p>

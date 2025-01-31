@@ -7,12 +7,13 @@ import { direntToPath } from "./utils/file.ts";
 import { calculateNormalizedCompressionDistances } from "./NCD/ncd.ts";
 import { getDirReader } from "./utils/file.ts";
 
-async function readGitignoreLines(targetDirectory: string) {
+async function readGitignoreLines(targetDirectory: string): Promise<string[]> {
   try {
     return (await readFile(resolve(targetDirectory, ".gitignore"), "utf-8"))
       .trim()
       .split("\n")
-      .filter((x) => x.length > 0);
+      .filter((x) => x.length > 0)
+      .filter((x) => !x.startsWith("#"));
   } catch (error) {
     console.warn("Warning: No .gitignore file found in target directory");
     return [];
