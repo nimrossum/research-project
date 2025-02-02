@@ -1,7 +1,7 @@
 import { compress as zstd } from "@mongodb-js/zstd";
 
 const compressionAlgorithms = {
-  zstd: zstd,
+  zstd
 };
 
 export function compress(
