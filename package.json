@@ -1,15 +1,16 @@
 {
   "name": "research-project",
+  "version": "0.0.1",
   "module": "index.ts",
   "main": "cli/serve.ts",
   "type": "module",
   "bin": {
-    "ncr-repo": "cli/ncr-repo.ts",
+    "ncd-repo": "cli/ncd-repo.ts",
     "compress": "cli/compress.ts"
   },
   "scripts": {
     "start": "bun --run serve",
-    "ncr-repo": "bun cli/ncr-repo.ts",
+    "ncd-repo": "bun cli/ncd-repo.ts",
     "compress": "bun cli/compress.ts",
     "serve": "bun cli/serve.ts",
     "serve:watch": "bun --watch cli/serve.ts",

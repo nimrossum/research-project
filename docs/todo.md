@@ -1,6 +1,6 @@
 - [x] Handle directories recursively
 - [x] Handle error when there is no .gitignore
-  - [ ] Visualize the directory structure
+- [ ] Visualize the directory structure
 - [ ] See what is most complex ts file in the Git Truck repository
 - [ ] See what is most complex tsx file in the Git Truck repository
   - [ ] What is the most complex file in the repository?
@@ -21,7 +21,7 @@
 
 - The least similar file compared to the rest of the repository
 
-- [ ] Meeting in January
+- [x] Meeting in January
 
 Ideas
 - Git Truck can run on Author tag, co-author tag
