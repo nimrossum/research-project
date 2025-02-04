@@ -14,13 +14,12 @@ import { time } from "@/utils/misc.ts";
  */
 
 export async function calculateNormalizedCompressionDistances(
-  targetDirectory: string,
   filePaths: string[]
 ) {
   const differentFileExtensions = new Set(
     filePaths.map((f) => f.split(".").pop())
   );
-  console.log(
+  !global.silent && console.log(
     `👉 Found ${differentFileExtensions.size} extensions: ${Array.from(
       differentFileExtensions
     ).join(", ")}`
@@ -41,9 +40,9 @@ export async function calculateNormalizedCompressionDistances(
   let memoryUsage = 0;
   let fileCount = 0;
 
-  console.log("👉 Reading files into memory");
-  console.log();
-  console.log();
+  !global.silent && console.log("👉 Reading files into memory");
+  !global.silent && console.log();
+  !global.silent && console.log();
 
   // 1. Read all files into memory
   for (const f of filePaths) {
@@ -58,7 +57,7 @@ export async function calculateNormalizedCompressionDistances(
     // process.stdout.write("\x1b[1A\x1b[K");
     // console.log(f);
     if (A > 1024 ** 2) {
-      console.warn(`Warning: ${f} is larger than 1 mB`);
+      !global.silent && console.warn(`Warning: ${f} is larger than 1 mB`);
     }
     // console.log(
     //   `Memory usage: ${(
@@ -77,21 +76,21 @@ export async function calculateNormalizedCompressionDistances(
   const fileBuffers = Array.from(ARawMap.values());
   // assert(fileBuffers.length === filePaths.length);
 
-  console.log(`👉 Concatenating ${fileBuffers.length} files`);
+  !global.silent && console.log(`👉 Concatenating ${fileBuffers.length} files`);
   const concatenatedBuffer = time(Buffer.concat)(fileBuffers);
 
   // _AR_ is the size of the all files concatenated
   const AR = concatenatedBuffer.length;
 
   // _AR_ is the compressed size of the all files concatenated
-  console.log(`👉 Compressing ${fileBuffers.length} files`);
+  !global.silent && console.log(`👉 Compressing ${fileBuffers.length} files`);
   const _AR_ = (await compress(concatenatedBuffer, "zstd")).length;
-  console.log(`✅ Compressed size: ${(_AR_ / 1024 ** 2).toLocaleString()} mB`);
+  !global.silent && console.log(`✅ Compressed size: ${(_AR_ / 1024 ** 2).toLocaleString()} mB`);
 
   // assert(_AR_ < AR);
 
-  console.log(`👉 Calculating _R_ for each file`);
-  console.log();
+  !global.silent && console.log(`👉 Calculating _R_ for each file`);
+  !global.silent && console.log();
   let i = 0;
   // 3. For each file A, calculate the compression R for all files except A
   for (const f of filePaths) {
@@ -116,8 +115,8 @@ export async function calculateNormalizedCompressionDistances(
     i++;
   }
 
-  console.log("✅ Done calculating _R_");
-  console.log("👉 Calculating NCD for each file");
+  !global.silent && console.log("✅ Done calculating _R_");
+  !global.silent && console.log("👉 Calculating NCD for each file");
 
   // 4. Calculate the normalized compression distance for each file
   const NCD_As = filePaths.map((fp) => {
@@ -135,10 +134,9 @@ export async function calculateNormalizedCompressionDistances(
     };
   });
 
-  console.log("✅ Done calculating NCD for each file");
+  !global.silent && console.log("✅ Done calculating NCD for each file");
 
   return {
-    targetDirectory,
     AR,
     _AR_,
     NCD_As,

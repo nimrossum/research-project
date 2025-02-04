@@ -2,6 +2,7 @@ import { useDeferredValue, useSyncExternalStore } from "react";
 import { createRoot } from "react-dom/client";
 import { Treemap } from "@/web/lib/Treemap.tsx";
 import { computeNCDForRepositoryFiles } from "compute.ts";
+import type { Data } from "@/cli/serve";
 
 type Entry = Awaited<
   ReturnType<typeof computeNCDForRepositoryFiles>
@@ -74,9 +75,7 @@ const root = createRoot(document.getElementById("root")!);
 //   </Suspense>
 // );
 
-const result = (await response.json()) as Awaited<
-  ReturnType<typeof computeNCDForRepositoryFiles>
->;
+const result = (await response.json()) as Data;
 
 const sizeProperty: keyof (typeof result)["NCD_As"][number] = "A";
 const colorProperty: keyof (typeof result)["NCD_As"][number] = "NCD_A";

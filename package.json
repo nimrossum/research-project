@@ -6,18 +6,21 @@
   "type": "module",
   "bin": {
     "ncd-repo": "cli/ncd-repo.ts",
+    "ncd-pair-repo": "cli/ncd-repo.ts",
     "compress": "cli/compress.ts"
   },
   "scripts": {
     "start": "bun --run serve",
     "ncd-repo": "bun cli/ncd-repo.ts",
+    "ncd-pair-repo": "bun cli/ncd-pair-repo.ts",
     "compress": "bun cli/compress.ts",
+    "concat": "bun cli/concat.ts",
     "serve": "bun cli/serve.ts",
     "serve:watch": "bun --watch cli/serve.ts",
     "test": "bun --test"
   },
   "peerDependencies": {
-    "typescript": "^5.7.2"
+    "typescript": "^5.8.0-beta"
   },
   "dependencies": {
     "@mongodb-js/zstd": "^2.0.0",
@@ -30,7 +33,6 @@
     "d3": "^7.9.0",
     "ignore": "^6.0.2",
     "is-binary-path": "^3.0.0",
-    "lucide-react": "^0.474.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "tailwind-merge": "^3.0.1",

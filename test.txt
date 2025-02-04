@@ -1,0 +1,5 @@
+Hello this is some example text.
+
+This is a very simple example of a text file. It is a plain text file that contains some text. This text file is called test.txt and it is located in the same directory as this program. The text file contains the following text:
+
+Hello this is some example text.

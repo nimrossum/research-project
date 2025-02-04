@@ -1,0 +1,21 @@
+This file is completely different and writes about some other stuff.
+
+Here is some python code to read an image and mask out blue pixels:
+
+```python
+import os
+
+from PIL import Image
+
+# Load the image
+image_path = os.path.join('images', 'example.png')
+image = Image.open(image_path)
+
+# Create a mask for blue pixels
+mask = image.split()[2].point(lambda p: p > 150 and 255)
+
+# Save the mask
+mask_path = os.path.join('images', 'mask.png')
+mask.save(mask_path)
+```
+

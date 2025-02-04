@@ -12,9 +12,8 @@ export async function* getDirReader(
 ): AsyncGenerator<string> {
   const { include, exclude } = options;
   const excluder = ignore().add(exclude);
-  const includer = ignore().add(include);
 
-  const glob = new Glob("**/*.*");
+  const glob = new Glob(Array.isArray(include) ? include.join(",") : include);
 
   for await (const absolutePath of glob.scan({
     cwd: dir,
@@ -38,9 +37,7 @@ export async function* getDirReader(
       continue;
     }
 
-    if (!includer.ignores(relativePath)) {
-      yield absolutePath;
-    }
+    yield absolutePath;
   }
 }
 

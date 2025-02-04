@@ -49,7 +49,15 @@ My hypothesis is that this will be similar to the NCD, but faster to compute, si
 
 - Ignore uninteresting files, such as `package-lock.json` etc. or only focus on specific file extensions, or a specific file
 
-## Meeting with Mircea
+## Meeting
 
 - [ ] ## How much do I write in the report?
 -
+
+## Experiment with pairwise NCD
+
+$$
+NCD_A = \frac{|AB| - \min(|A|, |B|)}{\max(|A|, |B|)}
+$$
+
+https://docs.google.com/spreadsheets/d/1e0tJ4RbjhQDNtrmz0V0GZrwKZ1rmo8k5m77CXuiTnsU/edit?gid=1368586681#gid=1368586681

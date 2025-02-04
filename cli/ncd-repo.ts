@@ -22,7 +22,7 @@ if (!outputFormats.includes(format)) {
   process.exit(1);
 }
 
-console.log(`Computing stats for ${targetDirectory}`);
+!global.silent && console.log(`Computing stats for ${targetDirectory}`);
 const {
   AR,
   _AR_,

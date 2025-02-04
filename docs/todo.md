@@ -66,8 +66,3 @@ In the final solution, we want to know who contributed to this file
 Cumulative, Alice did so much towards the final solution and Bob did so much towards the final solution
 
 ![alt text](image.png)
-
-
-
-
-

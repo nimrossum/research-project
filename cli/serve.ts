@@ -20,20 +20,8 @@ const server = serve({
     const url = new URL(req.url);
     switch (url.pathname) {
       case "/data.json": {
-        const targetDirectory = process.argv[2] ?? ".";
-        const targetDirectoryNormalized = resolve(normalize(targetDirectory));
-
-        const excludeGlobs = process.argv[3] ? [process.argv[3]] : undefined;
-        const includeGlobs = process.argv[4] ? [process.argv[4]] : undefined;
-
-        const dataPromise = computeNCDForRepositoryFiles(
-          targetDirectoryNormalized,
-          {
-            exclude: excludeGlobs,
-            include: includeGlobs,
-          }
-        );
-        return Response.json(await dataPromise);
+        const data = await getData();
+        return Response.json(data);
       }
       default: {
         if (url.pathname.startsWith("/static")) {
@@ -46,10 +34,31 @@ const server = serve({
         });
       }
     }
+
   },
 });
 
 console.log(`✅ Serving on ${server.url}`);
+
+async function getData() {
+  const targetDirectory = process.argv[2] ?? ".";
+  const targetDirectoryNormalized = resolve(normalize(targetDirectory));
+
+  const excludeGlobs = process.argv[3] ? [process.argv[3]] : undefined;
+  const includeGlobs = process.argv[4] ? [process.argv[4]] : undefined;
+
+  const dataPromise = computeNCDForRepositoryFiles(
+    targetDirectoryNormalized,
+    {
+      exclude: excludeGlobs,
+      include: includeGlobs,
+    }
+  );
+  const data = { targetDirectory, ...(await dataPromise) };
+  return data;
+}
+
+export type Data = Awaited<ReturnType<typeof getData>>;
 
 // const app = express();
 

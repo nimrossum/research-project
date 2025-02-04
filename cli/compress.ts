@@ -1,4 +1,4 @@
-#!/usr/bin/env node --experimental-strip-types
+#!/usr/bin/env bun
 
 import { readFileSync } from "fs";
 import { compress } from "@/NCD/compress.ts";
@@ -12,10 +12,11 @@ if (process.stdin.isTTY) {
 const inputBuffer = readFileSync(process.stdin.fd);
 
 const compressedBuffer = await compress(inputBuffer);
-console.log(compressedBuffer);
 console.log(`Input Buffer Length: ${inputBuffer.length}`);
 console.log(`Compressed Buffer Length: ${compressedBuffer.length}`);
 console.log(
   "Compression Ratio: ",
   compressedBuffer.length / inputBuffer.length
 );
+
+const NCD = (_AR_ - Math.min(_A_, _R_)) / Math.max(_A_, _R_);

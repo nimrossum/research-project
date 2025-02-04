@@ -7,7 +7,6 @@ describe("NCD", () => {
     expect(async () => {
       const filePaths = ["./compute.ts", "./NCD/ncd.ts", "./NCD/compress.ts"];
       const result = await calculateNormalizedCompressionDistances(
-        "..",
         filePaths
       );
       console.log(result);
