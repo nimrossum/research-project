@@ -37,29 +37,35 @@ async function readGitignoreLines(targetDirectory: string): Promise<string[]> {
   }
 }
 
-export type DirectoryReaderOptions = {
-  include: string[];
-  exclude: string[];
+export type DirectoryScannerOptions = {
+  /** An array of glob patterns to include (defaults to all files) */
+  include?: string[];
+  /** An array of glob patterns to exclude (defaults to node_modules, dist, build, bin, obj, out */
+  exclude?: string[];
+  /** Whether to exclude files that match the .gitignore file */
   excludeFromGitIgnore?: boolean;
 };
 
-export async function* getDirReader(
+export async function* streamDirectoryScanner(
   dir: string,
-  options: DirectoryReaderOptions = {
-    include: ["**/*.*"],
-    exclude: [],
-    excludeFromGitIgnore: true,
-  }
+  {
+    include = ["**/*.*"],
+    exclude = [],
+    excludeFromGitIgnore = true,
+  }: DirectoryScannerOptions = {}
 ): AsyncGenerator<string> {
-  const { include, exclude, excludeFromGitIgnore: excludeGitIgnore } = options;
-  const excluder = ignore().add(exclude);
+  const excluder = ignore();
+
+  if (exclude) {
+    excluder.add(exclude);
+  }
 
   !global.silent &&
     console.log(
       `👉 Scanning ${dir} for files with extensions: ${include}, excluding: ${exclude}`
     );
 
-  if (excludeGitIgnore) {
+  if (excludeFromGitIgnore) {
     const gitignoreLines = await readGitignoreLines(dir);
     excluder.add(gitignoreLines);
   }
@@ -80,7 +86,11 @@ export async function* getDirReader(
     const stats = await stat(absolutePath);
 
     if (stats.isDirectory()) {
-      yield* getDirReader(absolutePath, options);
+      yield* streamDirectoryScanner(absolutePath, {
+        include,
+        exclude,
+        excludeFromGitIgnore,
+      });
       continue;
     }
 

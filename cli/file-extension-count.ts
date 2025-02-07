@@ -1,9 +1,9 @@
-import { getDirReader } from "@/utils/file";
+import { streamDirectoryScanner } from "@/utils/file";
 import { asyncIteratorToArray } from "@/utils/iterator";
 
 const dir = process.argv[2] || ".";
 
-const filePaths = await asyncIteratorToArray(getDirReader(dir));
+const filePaths = await asyncIteratorToArray(streamDirectoryScanner(dir));
 
 console.log(`✅ Found ${filePaths.length} files`);
 

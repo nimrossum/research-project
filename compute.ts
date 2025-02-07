@@ -6,7 +6,7 @@ import { calculateNormalizedCompressionDistances } from "./NCD/ncd.ts";
 
 import { compress } from "./NCD/compress.ts";
 import { readFileSync } from "node:fs";
-import { getDirReader, type DirectoryReaderOptions } from "@/utils/file.ts";
+import { streamDirectoryScanner, type DirectoryScannerOptions } from "@/utils/file.ts";
 
 /**
  * Compute the normalized compression ratio for all code files
@@ -23,11 +23,11 @@ import { getDirReader, type DirectoryReaderOptions } from "@/utils/file.ts";
  */
 export async function computeNCDForRepositoryFiles(
   targetDirectory: string,
-  dirReaderOptions: DirectoryReaderOptions
+  dirReaderOptions: DirectoryScannerOptions
 ) {
   // Read file tree recursively
   const filterPaths = async (dir: string) =>
-    await asyncIteratorToArray(getDirReader(dir, dirReaderOptions));
+    await asyncIteratorToArray(streamDirectoryScanner(dir, dirReaderOptions));
 
   const entries = await time(filterPaths)(targetDirectory);
   const length = entries.length;
@@ -44,11 +44,11 @@ export async function computeNCDForRepositoryFiles(
  */
 export async function computePairwiseNCD(
   targetDirectory: string,
-  dirReaderOptions: DirectoryReaderOptions
+  dirReaderOptions: DirectoryScannerOptions
 ) {
   // Read file tree recursively
   const filterPaths = async (dir: string) =>
-    await asyncIteratorToArray(getDirReader(dir, dirReaderOptions));
+    await asyncIteratorToArray(streamDirectoryScanner(dir, dirReaderOptions));
 
   let entries = await time(filterPaths)(targetDirectory);
   entries.sort();
@@ -116,7 +116,7 @@ export async function computePairwiseNCD(
 
         map.set(xy, abresult);
         i++;
-        if (i % 100 === 0 && performance.now() - lastPrintTime > 1000 / 30) {
+        if (i === goal - 1 || (i % 100 === 0 && performance.now() - lastPrintTime > 1000 / 30)) {
           lastPrintTime = performance.now();
 
           const ellapsedTime = performance.now() - startTime;
@@ -165,7 +165,7 @@ export async function* computeStream(
   targetDirectory: string,
   excludeGitignore = true
 ) {
-  for await (const entry of getDirReader(targetDirectory)) {
+  for await (const entry of streamDirectoryScanner(targetDirectory)) {
 
     // Do computation
     yield JSON.stringify({

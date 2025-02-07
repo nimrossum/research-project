@@ -30,7 +30,6 @@ console.log(`👉 Computing stats for ${directory}`);
 
 const { paths, getEntry, getKeys } = await computePairwiseNCD(targetDirectory, {
   include: [include],
-  compressor: compressor as keyof typeof compressionAlgorithms,
 });
 
 // Sort by accumulative distance
