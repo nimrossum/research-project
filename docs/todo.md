@@ -1,19 +1,13 @@
 - [x] Handle directories recursively
 - [x] Handle error when there is no .gitignore
-- [ ] Visualize the directory structure
-- [ ] See what is most complex ts file in the Git Truck repository
-- [ ] See what is most complex tsx file in the Git Truck repository
+- [x] See what is most complex ts file in the Git Truck repository: bun run ncd-pair-repo ..\git-truck\ "**/*.{ts}" git-truck\src\analyzer\DB.server.ts
+- [x] See what is most complex tsx file in the Git Truck repository: bun run ncd-pair-repo ..\git-truck\ "**/*.{tsx}" git-truck\src\components\Chart.tsx
   - [ ] What is the most complex file in the repository?
   - [ ] Does that change over time?
-- [ ] Watch mode for serve
-- [ ] Add test
-
-
-
-
-
-- [ ] Accumulated or max pair wise similarity between each file
+- [x] Accumulated or max pair wise similarity between each file
 - [ ] Normalization / Pre-processing
+- [ ] Visualize the relationships between files using a force-directed graph
+- [ ] Multi-thread the file comparison
 
 - Given a file, highlight the most similar files in the repository
 - Clustering? (give me 10 clusters, which cluster does this file belong to?)
@@ -50,7 +44,7 @@ Use TreeSitter
 - to ignore comments (to avoid comments to matter, maybe an option to include comments?)
 - to replace variables with a generic token (to minimize the impact of variable names), etc.
 
-## Similarity to final solution
+## Christian's Idea: Similarity to final solution
 
 In the final solution, we want to know who contributed to this file
   - Go back in time and look at each commit (full state of the repo)
@@ -66,3 +60,4 @@ In the final solution, we want to know who contributed to this file
 Cumulative, Alice did so much towards the final solution and Bob did so much towards the final solution
 
 ![alt text](image.png)
+
