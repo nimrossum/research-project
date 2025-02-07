@@ -1,5 +1,5 @@
 import { readFile } from "fs/promises";
-import { compress } from "./compress.ts";
+import { compress } from "@/utils/compress.ts";
 import assert from "assert";
 import { time } from "@/utils/misc.ts";
 

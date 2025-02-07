@@ -4,7 +4,7 @@ import { formatMsTime, time } from "./utils/misc.ts";
 import { asyncIteratorToArray } from "./utils/iterator.ts";
 import { calculateNormalizedCompressionDistances } from "./NCD/ncd.ts";
 
-import { compress } from "./NCD/compress.ts";
+import { compress } from "@/utils/compress.ts";
 import { readFileSync } from "node:fs";
 import { streamDirectoryScanner, type DirectoryScannerOptions } from "@/utils/file.ts";
 

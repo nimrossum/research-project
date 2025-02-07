@@ -3,14 +3,14 @@
 import { resolve } from "node:path";
 import { computePairwiseNCD } from "@/compute.ts";
 import { mkdir } from "node:fs/promises";
-import { compressionAlgorithms } from "@/NCD/compress";
+import { compressionAlgorithms } from "@/utils/compress";
 import { time } from "@/utils/misc";
 
 declare global {
   var silent: boolean;
 }
 
-global.silent = false;
+// global.silent = true;
 
 const targetDirectory = resolve(process.argv[2] ?? ".");
 const parentDirectory = resolve(targetDirectory, "..");
