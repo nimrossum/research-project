@@ -44,3 +44,13 @@ export function formatMsTime(time: number) {
   unit = "d";
   return `${time.toFixed(2)}${unit}`;
 }
+
+export const katch: <T>(
+  p: Promise<T>
+) => Promise<[T, null] | [null, unknown]> = async (p) => {
+  try {
+    return [await p, null];
+  } catch (e) {
+    return [null, e];
+  }
+};

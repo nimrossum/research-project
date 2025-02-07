@@ -1,58 +1,12 @@
-import { readFile, stat } from "node:fs/promises";
-import { join, resolve } from "node:path";
+import { stat } from "node:fs/promises";
 import ignore from "ignore";
 import { formatMsTime, time } from "./utils/misc.ts";
 import { asyncIteratorToArray } from "./utils/iterator.ts";
-import { direntToPath } from "./utils/file.ts";
 import { calculateNormalizedCompressionDistances } from "./NCD/ncd.ts";
-import { getDirReader } from "./utils/file.ts";
+
 import { compress } from "./NCD/compress.ts";
 import { readFileSync } from "node:fs";
-
-async function readGitignoreLines(targetDirectory: string): Promise<string[]> {
-  try {
-    return (await readFile(resolve(targetDirectory, ".gitignore"), "utf-8"))
-      .trim()
-      .split("\n")
-      .filter((x) => x.length > 0)
-      .filter((x) => !x.startsWith("#"));
-  } catch (error) {
-    console.warn("Warning: No .gitignore file found in target directory");
-    return [];
-  }
-}
-
-const includeExtensions = [
-  "ts",
-  "js",
-  "json",
-  "md",
-  "html",
-  "css",
-  "scss",
-  "sass",
-  "less",
-  "cs",
-  "java",
-  "py",
-  "go",
-  "rb",
-  "php",
-  "c",
-  "cpp",
-  "h",
-  "hpp",
-  "cshtml",
-  "xml",
-  "yml",
-  "yaml",
-  "toml",
-  "sh",
-  "bat",
-  "ps1",
-];
-
-const defaultInclude = join("**", `*.{${includeExtensions.join(",")}}`);
+import { getDirReader, type DirectoryReaderOptions } from "@/utils/file.ts";
 
 /**
  * Compute the normalized compression ratio for all code files
@@ -69,44 +23,11 @@ const defaultInclude = join("**", `*.{${includeExtensions.join(",")}}`);
  */
 export async function computeNCDForRepositoryFiles(
   targetDirectory: string,
-  {
-    include = [defaultInclude],
-    exclude = [
-      "node_modules",
-      "dist",
-      "build",
-      "bin",
-      "obj",
-      "out",
-      "PackageCache",
-      "cache",
-      "datasets",
-      "data",
-      "*.csv",
-      "*.sqlite",
-      "*.bin",
-    ],
-    excludeGitIgnore = true,
-  }: { include?: string[]; exclude?: string[]; excludeGitIgnore?: boolean }
+  dirReaderOptions: DirectoryReaderOptions
 ) {
-  exclude = [
-    ...(exclude ?? []),
-    ...(excludeGitIgnore
-      ? await time(readGitignoreLines)(targetDirectory)
-      : []),
-  ];
-  console.log(
-    `👉 Scanning ${targetDirectory} for files with extensions: ${include}, excluding: ${exclude}`
-  );
-
   // Read file tree recursively
   const filterPaths = async (dir: string) =>
-    await asyncIteratorToArray(
-      getDirReader(dir, {
-        include,
-        exclude,
-      })
-    );
+    await asyncIteratorToArray(getDirReader(dir, dirReaderOptions));
 
   const entries = await time(filterPaths)(targetDirectory);
   const length = entries.length;
@@ -123,53 +44,11 @@ export async function computeNCDForRepositoryFiles(
  */
 export async function computePairwiseNCD(
   targetDirectory: string,
-  {
-    // include = ["**/*"],
-    include = [defaultInclude],
-    exclude = [
-      "node_modules",
-      "dist",
-      "build",
-      "bin",
-      "obj",
-      "out",
-      "PackageCache",
-      "cache",
-      "datasets",
-      "data",
-      "*.csv",
-      "*.sqlite",
-      "*.bin",
-    ],
-    excludeGitIgnore = true,
-    compressor = "zstd",
-  }: {
-    include?: string[];
-    exclude?: string[];
-    excludeGitIgnore?: boolean;
-    compressor?: Parameters<typeof compress>[1];
-  } = {}
+  dirReaderOptions: DirectoryReaderOptions
 ) {
-  exclude = [
-    ...(exclude ?? []),
-    ...(excludeGitIgnore
-      ? await time(readGitignoreLines)(targetDirectory)
-      : []),
-  ];
-
-  !global.silent &&
-    console.log(
-      `👉 Scanning ${targetDirectory} for files with extensions: ${include}, excluding: ${exclude}`
-    );
-
   // Read file tree recursively
   const filterPaths = async (dir: string) =>
-    await asyncIteratorToArray(
-      getDirReader(dir, {
-        include,
-        exclude,
-      })
-    );
+    await asyncIteratorToArray(getDirReader(dir, dirReaderOptions));
 
   let entries = await time(filterPaths)(targetDirectory);
   entries.sort();
@@ -183,44 +62,59 @@ export async function computePairwiseNCD(
   let lastPrintTime = 0;
   let i = 0;
 
-  console.log("");
-  console.log(`${goal.toLocaleString()} pairs to process`);
-  console.log("");
-
   const z = (data: Buffer) => compress(data, "zstd");
 
+  const bufferCache = new Map<string, Buffer>();
+  const compressedBufferCache = new Map<string, Buffer>();
+  // Not sure if it is faster to read the length directly from the buffer or cache it in a map
+  // const compressedBufferSizeCache = new Map<string, number>();
+
+  const getBuffer = (path: string) => {
+    if (bufferCache.has(path)) {
+      return bufferCache.get(path)!;
+    }
+    const buffer = readFileSync(path);
+    bufferCache.set(path, buffer);
+    return buffer;
+  };
+
+  const getCompressedBuffer = async (path: string) => {
+    const cached_C_ = compressedBufferCache.get(path);
+    if (cached_C_) {
+      return cached_C_;
+    }
+
+    const buffer = getBuffer(path);
+    const compressedBuffer = await z(buffer);
+    compressedBufferCache.set(path, compressedBuffer);
+    return compressedBuffer;
+  };
+
+  const getCompressedBufferSize = async (path: string) => {
+    return (await getCompressedBuffer(path)).length;
+  };
+
   const map = await time(async () => {
-    const fileBuffers = new Map<string, Buffer>();
     const map = new Map<string, number>();
 
-    for (const a of entries) {
-      for (const b of entries) {
-        const ab = mkKey(a, b);
+    for (const x of entries) {
+      const xBuffer = getBuffer(x);
+      const C_x = await getCompressedBufferSize(x);
 
-        if (map.has(ab)) {
-          i++;
+      for (const y of entries) {
+        const xy = mkKey(x, y);
+
+        if (map.has(xy)) {
           continue;
         }
 
-        const files = [a, b].sort();
-
-        const buffers = files.map((f) => {
-          const cachedBuffer = fileBuffers.get(f);
-          if (cachedBuffer !== undefined) {
-            return cachedBuffer!;
-          }
-          const buffer = readFileSync(f);
-          fileBuffers.set(f, buffer);
-          return buffer;
-        });
-
-        const C_xy = (await z(Buffer.concat(buffers))).length;
-        const C_x = (await z(buffers[0]!)).length;
-        const C_y = (await z(buffers[1]!)).length;
+        const yBuffer = getBuffer(y);
+        const C_y = await getCompressedBufferSize(y);
+        const C_xy = (await z(Buffer.concat([xBuffer, yBuffer]))).length;
 
         const abresult = (C_xy - Math.min(C_x, C_y)) / Math.max(C_x, C_y);
 
-        map.set(ab, abresult);
+        map.set(xy, abresult);
         i++;
         if (i % 100 === 0 && performance.now() - lastPrintTime > 1000 / 30) {
           lastPrintTime = performance.now();
@@ -231,40 +125,49 @@ export async function computePairwiseNCD(
           const estimatedTimeRemaining = ((goal - i) * ellapsedTime) / i;
           const estimatedTotalTime = ellapsedTime + estimatedTimeRemaining;
 
+          const percent = (i / goal) * 100;
+
           // Erase previous line
           process.stdout.write(
             "\x1b[1A\x1b[K\n" +
-              `${i.toLocaleString()} processed (${formattedTimeEllapsed}, time remaining: ${formatMsTime(
+              `${i.toLocaleString()} of ${goal.toLocaleString()} (${percent.toFixed(
+                4
+              )}%) processed (${formattedTimeEllapsed}, time remaining: ${formatMsTime(
                 estimatedTimeRemaining
-              )}, total time estimate: ${formatMsTime(estimatedTotalTime)})`
+              )}, total time estimate: ${formatMsTime(
+                estimatedTotalTime
+              )}, time pr. pair: ${formatMsTime(ellapsedTime / i)})`
           );
         }
       }
     }
+    const ellapsedTime = performance.now() - startTime;
+    console.log();
+    console.log(`Total duration: ${formatMsTime(ellapsedTime)}`);
+    console.log(`Time pr. pair: ${formatMsTime(ellapsedTime / i)}`);
+    console.log();
     return map;
   })();
   return {
     paths: entries,
-    dataMap: map,
+    getEntries: () => map.entries(),
+    getEntry: (a: string, b: string) => map.get(mkKey(a, b)),
+    getKeys: () => Array.from(map.keys()),
   };
 }
 
+/**
+ * WIP
+ * @param targetDirectory
+ * @param excludeGitignore
+ */
 export async function* computeStream(
   targetDirectory: string,
-  excludeGitignore = true,
-  includeGlobPatterns = ["**/*"]
+  excludeGitignore = true
 ) {
-  const excludeGlobsPatterns = await readGitignoreLines(targetDirectory);
-  const ig = ignore().add(excludeGlobsPatterns);
+  for await (const entry of getDirReader(targetDirectory)) {
 
-  for await (const entry of getDirReader(targetDirectory, {
-    include: includeGlobPatterns,
-    exclude: excludeGlobsPatterns,
-  })) {
-    if (excludeGitignore && ig.ignores(entry)) {
-      continue;
-    }
-
+    // Do computation
     yield JSON.stringify({
       absolutePath: entry,
       relativePath: entry,
