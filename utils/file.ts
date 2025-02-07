@@ -37,6 +37,12 @@ export async function* getDirReader(
       continue;
     }
 
+    if (stats.size > 1024 ** 2) {
+      // If file is larger than 1 mB, warn
+      !global.silent &&
+        console.warn(`Warning: ${relativePath} is larger than 1 mB`);
+    }
+
     yield absolutePath;
   }
 }
