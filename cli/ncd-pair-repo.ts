@@ -1,8 +1,10 @@
 #!/usr/bin/env node --experimental-strip-types
 
-import { normalize } from "node:path";
+import { resolve } from "node:path";
 import { computePairwiseNCD } from "@/compute.ts";
 import { mkdir } from "node:fs/promises";
+import { compressionAlgorithms } from "@/NCD/compress";
+import { time } from "@/utils/misc";
 
 declare global {
   var silent: boolean;
@@ -10,64 +12,75 @@ declare global {
 
 global.silent = false;
 
-const targetDirectory = process.argv[2] ?? ".";
+const targetDirectory = resolve(process.argv[2] ?? ".");
+const parentDirectory = resolve(targetDirectory, "..");
 const include = process.argv[3] ?? "**/*.*";
-const compressor = process.argv[4] ?? undefined;
-// Input: folder
-const targetDirectoryNormalized = normalize(targetDirectory);
+const compressor = process.argv[4] ?? Object.keys(compressionAlgorithms)[0]!;
 
-const directory = targetDirectoryNormalized
+if (!(compressor in compressionAlgorithms)) {
+  throw new Error(`Invalid compression algorithm: ${compressor}`);
+}
+
+const directory = targetDirectory
   .split("\\")
   .filter((x) => x.length > 0)
   .pop();
 
 console.log(`👉 Computing stats for ${directory}`);
 
-const { paths, dataMap } = await computePairwiseNCD(
-  targetDirectoryNormalized,
-  {
-    include: [include],
-    compressor,
-  }
-);
-
+const { paths, getEntry, getKeys } = await computePairwiseNCD(targetDirectory, {
+  include: [include],
+  compressor: compressor as keyof typeof compressionAlgorithms,
+});
 
 // Sort by accumulative distance
 const sortedPaths = paths.sort((a, b) => {
   const aSum = paths.reduce(
     (acc, p) =>
       acc +
-      (dataMap.get([a, p].join("|")) ??
+      (getEntry(a, p) ??
         (() => {
-          throw new Error("No value found");
+          throw new Error(
+            "No value found for " +
+              [a, p].join("|") +
+              " keys: " +
+              [...getKeys()].slice(0, 10).join(", ")
+          );
         })()),
     0
   );
   const bSum = paths.reduce(
     (acc, p) =>
       acc +
-      (dataMap.get([b, p].join("|")) ??
+      (getEntry(b, p) ??
         (() => {
-          throw new Error("No value found");
+          throw new Error("No value found for " + [b, p].join("|"));
         })()),
     0
   );
   return bSum - aSum;
 });
 
-const replaceString = `C:\\Users\\jonas\\p\\${directory}\\`;
+const replaceString = parentDirectory;
+
 const result = [
   ["", ...sortedPaths.map((p) => p.replace(replaceString, ""))],
   ...sortedPaths.map((a) => [
     a.replace(replaceString, ""),
-    ...sortedPaths.map((b) => dataMap.get([a, b].join("|")) ?? -1),
+    ...sortedPaths.map((b) => getEntry(a, b) ?? -1),
   ]),
 ];
 
 try {
   await mkdir("data");
 } catch (_error) {}
-Bun.write(`data/${directory}.csv`, toCSV(result));
+
+const convertToCsv = () => toCSV(result);
+
+const csv = convertToCsv();
+
+const writeCSVToDisk = () => Bun.write(`data/${directory}.csv`, csv);
+await time(writeCSVToDisk)();
 
 function toCSV(data: (string | number)[][]) {
   const rows = data.map((row) =>
@@ -77,13 +90,3 @@ function toCSV(data: (string | number)[][]) {
   );
   return rows.join("\n");
 }
-
-// Generate "cartesian product" table of paths
-
-/*
-  A B C D E F
-A 0 1 2 3 4 5
-B 1 0 1 2 3 4
-C 2 1 0 1 2 3
-D 3 2 1 0 1 2
-*/
