@@ -75,7 +75,6 @@ export async function* streamDirectoryScanner(
   for await (const absolutePath of glob.scan({
     cwd: dir,
     absolute: true,
-    onlyFiles: false,
   })) {
     const relativePath = relative(dir, absolutePath);
 
@@ -84,15 +83,6 @@ export async function* streamDirectoryScanner(
     }
 
     const stats = await stat(absolutePath);
-
-    if (stats.isDirectory()) {
-      yield* streamDirectoryScanner(absolutePath, {
-        include,
-        exclude,
-        excludeFromGitIgnore,
-      });
-      continue;
-    }
 
     if (isBinaryPath(absolutePath)) {
       continue;
