@@ -1,0 +1,13 @@
+git clone https://github.com/virejdasani/Commited
+git clone https://github.com/torvalds/linux
+git clone https://github.com/microsoft/vscode
+git clone https://github.com/home-assistant/core
+git clone https://github.com/microsoft/PowerToys
+git clone https://github.com/Kas-tle/java2bedrock.sh
+git clone https://github.com/ultralytics/ultralytics
+git clone https://github.com/flutter/flutter
+git clone https://github.com/langchain-ai/langchain
+git clone https://github.com/Ultimaker/Cura
+git clone https://github.com/platformio/platformio-home
+git clone https://github.com/Koenkk/zigbee2mqtt
+git clone https://github.com/sqlite/sqlite.git
