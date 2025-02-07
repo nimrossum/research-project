@@ -16,14 +16,7 @@ import { time } from "@/utils/misc.ts";
 export async function calculateNormalizedCompressionDistances(
   filePaths: string[]
 ) {
-  const differentFileExtensions = new Set(
-    filePaths.map((f) => f.split(".").pop())
-  );
-  !global.silent && console.log(
-    `👉 Found ${differentFileExtensions.size} extensions: ${Array.from(
-      differentFileExtensions
-    ).join(", ")}`
-  );
+
 
   /** Maps file path to file content */
   const ARawMap = new Map<string, Buffer>();
