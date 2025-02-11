@@ -100,3 +100,13 @@ export async function* streamDirectoryScanner(
 
 export const direntToPath = (dirent: Dirent) =>
   join(dirent.parentPath, dirent.name);
+
+
+export function to2DCSV(data: (string | number)[][]) {
+  const rows = data.map((row) =>
+    row
+      .map((x) => (typeof x === "number" ? x.toString().replace(".", ",") : x))
+      .join(";")
+  );
+  return rows.join("\n");
+}

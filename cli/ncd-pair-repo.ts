@@ -5,6 +5,7 @@ import { computePairwiseNCD } from "@/compute.ts";
 import { mkdir } from "node:fs/promises";
 import { compressionAlgorithms } from "@/utils/compress";
 import { time } from "@/utils/misc";
+import { to2DCSV } from "@/utils/file";
 
 declare global {
   var silent: boolean;
@@ -12,13 +13,18 @@ declare global {
 
 // global.silent = true;
 
-const targetDirectory = resolve(process.argv[2] ?? ".");
-const parentDirectory = resolve(targetDirectory, "..");
-const include = process.argv[3] ?? "**/*.*";
-const compressor = process.argv[4] ?? Object.keys(compressionAlgorithms)[0]!;
+const formats = ["json", "csv"];
 
-if (!(compressor in compressionAlgorithms)) {
-  throw new Error(`Invalid compression algorithm: ${compressor}`);
+const targetDirectory = resolve(process.argv[2] ?? ".");
+const format = process.argv[3] ?? "json";
+const parentDirectory = resolve(targetDirectory, "..");
+const include = process.argv[4] ?? "**/*.*";
+const exclude = process.argv[5];
+
+if (!formats.includes(format)) {
+  throw new Error(
+    `Invalid format: ${format}, must be one of ${formats.join(", ")}`
+  );
 }
 
 const directory = targetDirectory
@@ -28,30 +34,32 @@ const directory = targetDirectory
 
 console.log(`👉 Computing stats for ${directory}`);
 
-const { paths, getEntry, getKeys } = await computePairwiseNCD(targetDirectory, {
+const result = await computePairwiseNCD(targetDirectory, {
   include: [include],
+  ...(exclude ? { exclude: [exclude] } : {}),
 });
 
+
 // Sort by accumulative distance
-const sortedPaths = paths.sort((a, b) => {
-  const aSum = paths.reduce(
+const sortedPaths = result.paths.sort((a, b) => {
+  const aSum = result.paths.reduce(
     (acc, p) =>
       acc +
-      (getEntry(a, p) ??
+      (result.getEntry(a, p) ??
         (() => {
           throw new Error(
             "No value found for " +
               [a, p].join("|") +
               " keys: " +
-              [...getKeys()].slice(0, 10).join(", ")
+              [...result.getKeys()].slice(0, 10).join(", ")
           );
         })()),
     0
   );
-  const bSum = paths.reduce(
+  const bSum = result.paths.reduce(
     (acc, p) =>
       acc +
-      (getEntry(b, p) ??
+      (result.getEntry(b, p) ??
         (() => {
           throw new Error("No value found for " + [b, p].join("|"));
         })()),
@@ -60,32 +68,30 @@ const sortedPaths = paths.sort((a, b) => {
   return bSum - aSum;
 });
 
-const replaceString = parentDirectory;
-
-const result = [
-  ["", ...sortedPaths.map((p) => p.replace(replaceString, ""))],
-  ...sortedPaths.map((a) => [
-    a.replace(replaceString, ""),
-    ...sortedPaths.map((b) => getEntry(a, b) ?? -1),
-  ]),
-];
-
 try {
   await mkdir("data");
 } catch (_error) {}
 
-const convertToCsv = () => toCSV(result);
+const replaceString = parentDirectory;
 
-const csv = convertToCsv();
+if (format === "csv") {
+  const csvResult = [
+    ["", ...sortedPaths.map((p) => p.replace(replaceString, ""))],
+    ...sortedPaths.map((a) => [
+      a.replace(replaceString, ""),
+      ...sortedPaths.map((b) => result.getEntry(a, b) ?? -1),
+    ]),
+  ];
 
-const writeCSVToDisk = () => Bun.write(`data/${directory}.csv`, csv);
-await time(writeCSVToDisk)();
+  const convertToCsv = () => to2DCSV(csvResult);
 
-function toCSV(data: (string | number)[][]) {
-  const rows = data.map((row) =>
-    row
-      .map((x) => (typeof x === "number" ? x.toString().replace(".", ",") : x))
-      .join(";")
-  );
-  return rows.join("\n");
+  const csv = convertToCsv();
+
+  const writeCSVToDisk = () => Bun.write(`data/${directory}.csv`, csv);
+  await time(writeCSVToDisk)();
+}
+
+else if (format === "json") {
+  const data = JSON.stringify(Object.fromEntries(result.getEntries()));
+  Bun.write(`web/static/data/${directory}.json`, data);
 }

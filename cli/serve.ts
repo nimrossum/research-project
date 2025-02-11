@@ -2,6 +2,7 @@
 
 import app from "@/web/index.html";
 import ncd from "@/web/ncd/index.html";
+import graph from "@/web/graph/index.html";
 import { join, normalize, resolve } from "node:path";
 import { computeNCDForRepositoryFiles } from "../compute.ts";
 import { serve } from "bun";
@@ -15,6 +16,7 @@ const server = serve({
   static: {
     "/": app,
     "/ncd": ncd,
+    "/graph": graph,
   },
   async fetch(req: Request) {
     const url = new URL(req.url);
@@ -23,6 +25,7 @@ const server = serve({
         const data = await getData();
         return Response.json(data);
       }
+      
       default: {
         if (url.pathname.startsWith("/static")) {
           const path = join("./web", url.pathname);
