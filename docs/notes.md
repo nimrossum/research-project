@@ -61,3 +61,16 @@ NCD_A = \frac{|AB| - \min(|A|, |B|)}{\max(|A|, |B|)}
 $$
 
 https://docs.google.com/spreadsheets/d/1e0tJ4RbjhQDNtrmz0V0GZrwKZ1rmo8k5m77CXuiTnsU/edit?gid=1368586681#gid=1368586681
+
+## Estimation of calculating pairwise NCD for all c files in Linux repository
+
+Amount of files: 34,985 c files
+
+- Should we exclude big files?
+- How many big files are there compared to smaller files
+- Is 1mb a large file?
+
+- Why is it slow in the beginning
+  - Because it is the first time it sees each file
+  - For the second file, all files are already compressed and loaded into memory
+  

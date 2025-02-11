@@ -60,7 +60,7 @@ export async function computePairwiseNCD(
   const goal = (length + length * length) / 2;
   const startTime = performance.now();
   let lastPrintTime = 0;
-  let i = 0;
+  let i = 1;
 
   const z = (data: Buffer) => compress(data, "zstd");
 
@@ -94,10 +94,15 @@ export async function computePairwiseNCD(
     return (await getCompressedBuffer(path)).length;
   };
 
+  console.log()
+  console.log()
+
   const map = await time(async () => {
     const map = new Map<string, number>();
 
+    let fileCount = 0;
     for (const x of entries) {
+
       const xBuffer = getBuffer(x);
       const C_x = await getCompressedBufferSize(x);
 
@@ -115,8 +120,7 @@ export async function computePairwiseNCD(
         const abresult = (C_xy - Math.min(C_x, C_y)) / Math.max(C_x, C_y);
 
         map.set(xy, abresult);
-        i++;
-        if (i === goal - 1 || (i % 100 === 0 && performance.now() - lastPrintTime > 1000 / 30)) {
+        if (i === goal || (i % 100 === 0 && performance.now() - lastPrintTime > 1000 / 30)) {
           lastPrintTime = performance.now();
 
           const ellapsedTime = performance.now() - startTime;
@@ -127,19 +131,25 @@ export async function computePairwiseNCD(
 
           const percent = (i / goal) * 100;
 
+          const erase = "\x1b[1A\x1b[K";
+          // Explanation:
+          // \x1b[1A: Move cursor up one line
+          // \x1b[K: Clear line from cursor to end
+
           // Erase previous line
           process.stdout.write(
-            "\x1b[1A\x1b[K\n" +
-              `${i.toLocaleString()} of ${goal.toLocaleString()} (${percent.toFixed(
-                4
-              )}%) processed (${formattedTimeEllapsed}, time remaining: ${formatMsTime(
-                estimatedTimeRemaining
-              )}, total time estimate: ${formatMsTime(
-                estimatedTotalTime
-              )}, time pr. pair: ${formatMsTime(ellapsedTime / i)})`
+            `${erase.repeat(2)}\n[${fileCount+1}/${entries.length}] ${x} (size: ${xBuffer.length.toLocaleString()})\n  ${i.toLocaleString()} of ${goal.toLocaleString()} (${percent.toFixed(
+              4
+            )}%) processed (${formattedTimeEllapsed}, time remaining: ${formatMsTime(
+              estimatedTimeRemaining
+            )}, total time estimate: ${formatMsTime(
+              estimatedTotalTime
+            )}, time pr. pair: ${formatMsTime(ellapsedTime / i)})`
           );
         }
+        i++;
       }
+      fileCount++;
     }
     const ellapsedTime = performance.now() - startTime;
     console.log();
@@ -151,6 +161,7 @@ export async function computePairwiseNCD(
   return {
     paths: entries,
     getEntries: () => map.entries(),
+    getMap: () => new Map(map),
     getEntry: (a: string, b: string) => map.get(mkKey(a, b)),
     getKeys: () => Array.from(map.keys()),
   };
