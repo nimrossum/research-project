@@ -1,48 +1,78 @@
 import { createRoot } from "react-dom/client";
 import { Treemap } from "@/web/lib/Treemap.tsx";
 import { createForceGraph } from "../lib/ForceGraph";
+import type { NCDJSONResult } from "@/cli/ncd-pair-repo";
 
 type Key = `${string}|${string}`;
 type SimDist = number;
-type Data = Record<Key, SimDist>;
 
+const urlSearchParams = new URLSearchParams(window.location.search);
 const project =
-  new URLSearchParams(window.location.search).get("project") ?? "git-truck";
+  urlSearchParams.get("project") ?? "git-truck";
 const response = await fetch(`./static/data/${project}.json`);
 if (!response.body) {
   throw new Error(`No data: ${response.status}`);
 }
 
+document.title = `${project} - NCD Graph`;
+
 const rootEl = document.getElementById("root")!;
 const root = createRoot(rootEl);
 
-const result = (await response.json()) as Data;
+const jsonDataResponse = (await response.json()) as NCDJSONResult;
+console.log(jsonDataResponse);
+const {
+  paths,
+  pairMap,
+  pairMapNormalized,
+  accumulatedDistanceMap,
+  parentDirectoryMap,
+  totalAccumulatedDistance: summedDistance,
+} = jsonDataResponse;
+
+const getGroup = (d: { id: string; group: string }): string => d.group;
+const getRadius = (d: { id: string; group: string }): number =>
+  5 + (accumulatedDistanceMap[d.id]!) * 10;
+const calculateLinkStrokeWidth = (l: {
+  source: string;
+  target: string;
+  weight: number;
+}): number => 3 + l.weight ** 1_000;
+// Normalize the link weights from 0.99 to 1.XX to 0 - 1
+
+// const isFileExtension = true;
+const isFileExtension = urlSearchParams.get("group") === "file";
 
 const graph = createForceGraph(
   {
-    nodes: new Set(Object.keys(result).map((x) => x.split("|")[0]))
-      .values()
-      .toArray()
-      .map((x) => ({
-        id: x!,
-        group: x.split("\\")[6]!,
-      })),
-    links: Object.entries(result)
+    nodes: paths.map((x) => ({
+      id: x!,
+      group: isFileExtension ? x.split(".").pop()! : parentDirectoryMap[x!]!,
+    })),
+    links: Object.entries(pairMap)
       .map(([key, value]) => {
         const [source, target] = key.split("|") as [string, string];
-        return { source, target, weight: Math.sqrt(value) };
+        return { source, target, weight: value };
       })
-      .filter((l) => l.weight < 0.90)
-      ,
+      .filter((l) => l.weight < 0.8 && l.source !== l.target && Math.random() > 0.3)
+      .map((l) => ({
+        ...l,
+        weight: l.weight ** -4,
+      })),
   },
   {
-    nodeGroup: (d) => d.group,
-    // nodeRadius: d => d.
-    nodeGroups: Array.from(new Set(Object.keys(result).map((x) => x.split("|")[0].split("\\")[6]!))),
-    nodeTitle: (d) => `${d.group} - ${d.id}`,
-    linkStrokeWidth: (l) => l.weight ** 3,
-    width: 1920,
-    height: 1080,
+    nodeGroup: getGroup,
+    nodeRadius: getRadius,
+    nodeGroups: isFileExtension
+      ? new Set(paths.map((x) => x.split(".").pop()!)).values().toArray()
+      : new Set(Object.values(parentDirectoryMap)).values().toArray(),
+    nodeTitle: (d) =>
+      `${d.id.split("\\").pop()} g:${d.group} r:${getRadius(d)} ad:${
+        accumulatedDistanceMap[d.id]
+      }`,
+    linkStrokeWidth: calculateLinkStrokeWidth,
+    width: 2560,
+    height: 1440,
   }
 );
 

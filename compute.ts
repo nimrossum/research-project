@@ -160,7 +160,8 @@ export async function computePairwiseNCD(
   })();
   return {
     paths: entries,
-    getEntries: () => map.entries(),
+    getEntries: () => map.entries().toArray(),
+    getValues: () => map.values().toArray(),
     getMap: () => new Map(map),
     getEntry: (a: string, b: string) => map.get(mkKey(a, b)),
     getKeys: () => Array.from(map.keys()),
