@@ -203,7 +203,7 @@ export function createForceGraph<Entry extends { id: string }>(
         .selectAll("g")
         .data(nodeGroups)
         .join("g")
-        .attr("transform", (d, i) => `translate(-50,${i * 20})`)
+        .attr("transform", (d, i) => `translate(-50,${i * 20-700})`)
         .call((g) =>
           g
             .append("rect")
