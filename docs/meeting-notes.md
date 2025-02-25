@@ -48,6 +48,8 @@ To do
   - [ ] Equally distributed throughout the lifetime of the project
   - [ ] Precision: Find outliers, do they make sense?
   - [ ] Recall: Define our own subjective i
+- [ ] Run the method
+- [ ] Compare with alternatives
 - [ ] Write about the method - Compression in a Google Doc
   - [ ] In this mini experiment, we tried to find ....
   - [ ] We used this code and this is what we found out
