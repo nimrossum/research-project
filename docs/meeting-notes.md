@@ -40,6 +40,8 @@ Questions about report:
 - [ ] What do you expect in the report
 
 
+## 04/03/2024 - Jonas / Mircea
+
 To do
 - [ ] Find subjectively "important" commits and compare with the "jump in distance"
 - [ ] Find 20 commits that are "important", 20 commits that are "boring"
