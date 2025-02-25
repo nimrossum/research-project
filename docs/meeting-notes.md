@@ -28,7 +28,29 @@ We agreed that I should
 
 Agenda:
 
-Questions:
+- In a bit of a rut, project feels underwhelming and I don't feel like I am making progress
+- Feels like there is a lot of trial and error, mostly error, which is not really interesting to write about
+- Still not convinced whether this is a useful metric to compute, at least with the current idea
+- Not sure what to focus on at this point
+- Christian just send a mail about a fast python version he wrote for calculating ncd relative to final revision
 
-- [ ] How many pages should I write in the report?
+Questions about report:
+
+- [ ] How many pages should I write?
+- [ ] What do you expect in the report
+
+
+To do
+- [ ] Find subjectively "important" commits and compare with the "jump in distance"
+- [ ] Find 20 commits that are "important", 20 commits that are "boring"
+  - [ ] Equally distributed throughout the lifetime of the project
+  - [ ] Precision: Find outliers, do they make sense?
+  - [ ] Recall: Define our own subjective i
+- [ ] Write about the method - Compression in a Google Doc
+  - [ ] In this mini experiment, we tried to find ....
+  - [ ] We used this code and this is what we found out
+- [ ] Find big "jumps in distance" and see if those commits seem important - be aware of bias
+- [ ] A lot of boring code / formatting -> does that lead to a
+- [ ] 
+
 - [ ] 
