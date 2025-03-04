@@ -40,7 +40,7 @@ Questions about report:
 - [ ] What do you expect in the report
 
 
-## 04/03/2024 - Jonas / Mircea
+## 11/03/2024 - Jonas / Mircea
 
 To do
 - [ ] Find subjectively "important" commits and compare with the "jump in distance"
@@ -55,6 +55,7 @@ To do
   - [ ] We used this code and this is what we found out
 - [ ] Find big "jumps in distance" and see if those commits seem important - be aware of bias
 - [ ] A lot of boring code / formatting -> does that lead to a
-- [ ] 
+- [ ]
 
-- [ ] 
+- [ ] How many pages should I write in the report?
+- [ ]
