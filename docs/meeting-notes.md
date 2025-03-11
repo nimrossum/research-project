@@ -44,12 +44,16 @@ Questions about report:
 
 To do
 - [ ] Find subjectively "important" commits and compare with the "jump in distance"
-- [ ] Find 20 commits that are "important", 20 commits that are "boring"
+  - [ ] Create a spreadsheet with subjectively top 10 most interesting commits and 10 most boring commits
+  - [ ] Find 20 commits that have "high information contribution" (adding something interesting), 20 commits that are "low information contribution" (formatting)
+    - [ ] Calculate LoC and NCD
   - [ ] Equally distributed throughout the lifetime of the project
-  - [ ] Precision: Find outliers, do they make sense?
+
+- [ ] Precision: Find outliers, do they make sense?
   - [ ] Recall: Define our own subjective i
-- [ ] Run the method
-- [ ] Compare with alternatives
+- [ ] Run the method, **distance between previous commit to this commit**
+- [ ] Compare with LoC
+    
 - [ ] Write about the method - Compression in a Google Doc
   - [ ] In this mini experiment, we tried to find ....
   - [ ] We used this code and this is what we found out
@@ -57,5 +61,4 @@ To do
 - [ ] A lot of boring code / formatting -> does that lead to a
 - [ ]
 
-- [ ] How many pages should I write in the report?
-- [ ]
+- [ ] Email mircea with update
