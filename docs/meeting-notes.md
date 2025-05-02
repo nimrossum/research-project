@@ -70,14 +70,14 @@ To do
 Focus: CD delta vs categories
 
 - [ ] Make sure LoCC data is correct
-- [ ] Make process more ergonomic
-  - [ ] Automatically detect top 1 extensions (this might be a problem for commits that )
+- [ ] Make process more ergonomic / automatic
+  - [ ] Automatically detect top 1 extensions (this might be a problem for commits that)
 
 - [ ] Manually Classify Zeeguu web commits
 - [ ] Manually Reclassify Git Truck commits
 - [ ] Manually Classify more Git Truck commits
 
 
-Observation: This method is robust to merge commits
+Observation: This method is robust to merge commits, merge commits do not report any changes with numstat, but this method does not look at numstat, so it is not affected by this.
 
 
