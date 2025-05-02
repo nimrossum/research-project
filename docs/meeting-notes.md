@@ -53,7 +53,7 @@ To do
   - [ ] Recall: Define our own subjective i
 - [ ] Run the method, **distance between previous commit to this commit**
 - [ ] Compare with LoC
-    
+
 - [ ] Write about the method - Compression in a Google Doc
   - [ ] In this mini experiment, we tried to find ....
   - [ ] We used this code and this is what we found out
@@ -62,3 +62,22 @@ To do
 - [ ]
 
 - [ ] Email mircea with update
+- [ ] How many pages should I write in the report?
+- [ ]
+
+## 02/05/2024 - Jonas / Mircea
+
+Focus: CD delta vs categories
+
+- [ ] Make sure LoCC data is correct
+- [ ] Make process more ergonomic
+  - [ ] Automatically detect top 1 extensions (this might be a problem for commits that )
+
+- [ ] Manually Classify Zeeguu web commits
+- [ ] Manually Reclassify Git Truck commits
+- [ ] Manually Classify more Git Truck commits
+
+
+Observation: This method is robust to merge commits
+
+
