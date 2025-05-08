@@ -70,6 +70,7 @@ To do
 Focus: CD delta vs categories
 
 - [ ] Make sure LoCC data is correct
+  - [ ]
 - [ ] Make process more ergonomic / automatic
   - [ ] Automatically detect top 1 extensions (this might be a problem for commits that)
 
@@ -80,4 +81,67 @@ Focus: CD delta vs categories
 
 Observation: This method is robust to merge commits, merge commits do not report any changes with numstat, but this method does not look at numstat, so it is not affected by this.
 
+
+## 08/05/2024 - Jonas / Mircea
+
+Observations:
+- Automatic extension detection is not perfect, only detects CS code in twooter, but python and yml is also present.
+- **Relevant for the final version is different from judging work by itself.**
+- Important: What is the research question?
+
+Future work:
+
+- Analyze pull requests
+- Correlate with reactions in GitHub
+
+
+
+
+
+What i did since last time:
+
+- Continued analysis
+- 100 commits from twooter, git-truck
+- Computed cd delta, looked at correlation between interesting / boring and cd delta
+
+
+Problems: Some commits
+
+Focus:
+- Fix LoCC bugs
+  - 2e05c1a9fd0c094b7e25aeba128de60a78c67081 Add deferred loading and prefetching (#734)
+  - has +1 -1, but in GitHub +476 -206
+  - Test case: http://localhost:3000/get-commits/?repo=git-truck&branch=2e05c1a9fd0c094b7e25aeba128de60a78c67081&count=1
+
+
+
+
+- We are not distinguishing between formatting or not,
+
+- Is it not robust to formatting?
+- [ ] Prepare a commit that does formatting and how large CD it has
+
+- Work backwards to find the research question
+  - From the data: What is the problem, describe it well and describe the solution.
+  - Clearly define the problem and answer the research question
+  - What is the problem we are trying to solve?
+  - Think about the main research question: Do we want to look at the comparison to final revision or the commit itself?
+
+
+Report:
+- Present problem
+- Present metric
+  - Correlation between CD delta and complexity
+- Present method
+- Present implementation
+
+
+- Ping Mircea when I have a draft
+
+
+Data TODO
+- Filter out commits that do not have changes to the filtered extensions
+- Instead of interesting / boring
+  - Minor / major commit
+  - Complex change / simple change
 
