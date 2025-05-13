@@ -62,6 +62,16 @@ I would like to thank Christian Gram Kalhauge \<chrg\@dtu.dk\> for proposing the
   listing-index: (enabled: true),
 )
 
+= Introduction
+
+
+
+RQ1 *Is the compression distance a more representative metric for quantifying the complexity than lines of code changed?*
+
+RQ2 *Can the compression distance tell us about the complexity of different categories of commits?*
+
+RQ3 *Does the compression distance suffer from the same limitations as lines of code changed in quantifying the contributions of developers?*
+
 = Introduction to Similarity Distance Metrics
 
 == Information distance
