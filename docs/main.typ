@@ -4,12 +4,14 @@
 
 #show: codly-init.with()
 
+
 #codly(
   languages: (
-    rust: (name: "Rust", icon: "🦀", color: rgb("#CE412B")),
+    rust: (name: "Rust", color: rgb("#CE412B")),
     sh: (name: "Terminal", color: rgb("#000000"))
   ),
-  number-format: none
+  number-format: none,
+  display-name: false 
 )
 #set text(lang: "en")
 
@@ -17,18 +19,42 @@
   title: [KIREPRO1PE \ \ Compression of Programs and the Similarity Distance],
   author: "Jonas Nim Røssum <jglr@itu.dk>",
   date: datetime(year: 2025, month: 05, day: 15),
-  abstract: [
+  abstract: [  
     #text(weight: "bold")[Supervisor:] Mircea Lungu \<mlun\@itu.dk\>
-
-    TODO: ABSTRACT
+  // TODO: ABSTRACT
   ],
   preface: [
     #align(center + horizon)[
-      \[#sym.dots.h\]
-      #text(style: "italic")[ 
-        They took away the old timbers from time to time, and put new and sound ones in their places, so that the vessel became a standing illustration for the philosophers in the mooted question of growth, some declaring that it *remained the same, others that it was not the same vessel.* ]
-      
-      —  Plutarch, Life of Theseus 23.1
+      #box(
+        width: 127mm,
+        [ 
+          _They took away the old timbers from time to time, and put new and sound ones in their places, so that the vessel became a standing illustration for the philosophers in the mooted question of growth, some declaring that it *remained the same, others that it was not the same vessel.*_ 
+          \
+          \
+          —  Plutarch, Life of Theseus 23.1
+        ]
+      )
+      \
+      \   
+      \
+      \   
+      \
+      \   
+      \
+      \    
+      \
+      \    
+      \
+      \    
+      \
+      \ 
+      #box(
+        width: 94mm,
+        [
+I would like to thank Christian Gram Kalhauge \<chrg\@dtu.dk\> for proposing the idea for this project and for his valuable external supervision and guidance.])
+
+
+  
     ] 
   ],
   bibliography: bibliography("refs.bib"),
@@ -39,49 +65,58 @@
 
 = Compression of Programs and the Similarity Distance
 
-== Lines of Code Changed
+== Information distance
 
-Lines of code (LoC) @Sourceli1:online is one of the most widely used sizing metrics in the software industry @nguyen2007sloc. Combining LoC with data from version control systems and diffing algorithms, we can track get the Lines of code _changed_, or LoCC over time. This is a commonly used technique used to detect activity in software systems over time @goeminne2013analyzing. It can be used to assess team velocity, developer productivity and more. These metrics can be automatically obtained via version control systems using tools like Git Truck@hojelse2022git. LoCC is a useful metric for quantifying contributions or regions of interest in software systems over time and tools like Git Truck have proven the effectiveness in the analysis of software evolution @lungu2022can, @neyem2025exploring. 
+// TODO
 
-= Problem: Shortcomings of LoCC
+== Lines of Code Changed as a measure of information distance
+
+Lines of code (LoC) @Sourceli1:online is one of the most widely used sizing metrics in the software industry @nguyen2007sloc. Combining LoC with data from version control systems and diffing algorithms, we can track the Lines of code _changed_, or LoCC over time. This way, we get a measure of the information distance between revisions
+
+// TODO: Incorporate information distance somehow
+
+This is a commonly used technique used to detect activity in software systems over time @goeminne2013analyzing. It can be used to assess team velocity, developer productivity and more. These metrics can be automatically obtained via version control systems using tools like Git Truck@hojelse2022git. LoCC is a useful metric for quantifying contributions or regions of interest in software systems over time and tools like Git Truck have proven the effectiveness in the analysis of software evolution @lungu2022can, @neyem2025exploring. 
+
+= Shortcomings of LoCC
 
 There are multiple problems when relying on LoCC as a sole metric of productivity.
 
-== First problem: Definition
+== First problem: Definition <loccDef>
 
 Firstly, the term itself is ambiguous and subjective to the formatting of the code. See the following examples in @ambiguousListings. A few of the questions that comes to mind include whether the examples should be counted as three or one lines of code. A developer writing either of these should be judged as equally productive, yet the developer who wrote the first listing deemed three times more productive as the others.
 
 #figure(
   caption: [Ambiguous line counts],
   grid(
-    columns: (13fr, 21fr, 19fr),
+    columns: (1fr, 1fr, 1fr),
     gutter: 10pt,
     rows: 60pt,
-    ```
-      if (condition) {
-        doStuff();
-      }
+    ```javascript
+    if (foo) {
+      bar();
+    }
     ```,  
-    ```
-      if (condition) { doStuff(); }
-      
-      
+    ```javascript
+    if (foo) { bar(); }
+    
+
     
     ```, 
-    ```
-      if (condition) doThis();
-      
-      
-      
+    ```javascript
+    if (foo) bar();
+    
+    
+    
     ```
   ),
 ) <ambiguousListings>
 
 == Second problem: Developer habits and automatic actions
 
-Another case where LoC falls short is when performing actions that affects a vast amount of files and leads to spikes in line changes. Examples of this include running formatting scripts or installing packages, which often leads to a lot of line changes in tracked lock files [ref]. 
+Another case where LoCC falls short is when performing actions that affects a vast amount of files and leads to spikes in line changes. Examples of this include running formatting scripts or installing packages, which often leads to a lot of line changes in tracked lock files [ref]. 
 
-#figure[Figure showing file with high activity / many automated commits]
+// TODO
+#figure[Figure of git truck showing file with high activity / many automated commits]
 
 These kinds of changes does not directly reflect high activity or productivity, but they still result in high LoCC values. These reasons show why this metric cannot stand alone as a measure of productivity. Doing so may lead to misinterpretation of the results, portraying certain developers or areas of the system as more active than they actually are. 
 
@@ -89,34 +124,51 @@ These kinds of changes does not directly reflect high activity or productivity, 
 
 The LoCC metric can be distorted also by file renames, which may artificially inflate contribution counts, since renaming a file requires little effort but appears as significant line changes. Git supports rename detection using a similarity threshold#footnote[https://git-scm.com/docs/git-log#Documentation/git-log.txt-code-Mltngtcode], comparing deleted and added files to identify likely renames, utilized by tools such as Git Truck. While Git doesn’t exclude renames by default, this tracking can be used to filter them out manually. However, rename detection is inherently ambiguous — at what point should we stop treating a change as a rename and instead count it as having deleted the old file and added a new one?#footnote[https://en.wikipedia.org/wiki/Ship_of_Theseus]
 
-The issue is further complicated when developers squash commits, potentially losing rename information. Ultimately, it’s a trade-off between overcounting trivial renames and missing substantial, legitimate contributions.
+The issue is further exacerbated when developers squash commits, potentially losing rename information. Ultimately, it’s a trade-off between overcounting trivial renames and missing substantial, legitimate contributions.
 
-=
+= Compression Distance
 
-Using an alternative approach, by concatenating the entire state of the repository, makes the analysis resistant to renames, as we don't care about file names, we only care about the bytes contained in the commit. However, in this case, we can no longer rely on diffing the concatenated string. We need to use another approach to derive the information distance from before and after a commit.
+
+To mitigate the issues described in @loccDef, we can consider the number of bytes instead of lines of code. 
+
+Then, we can compute the change in the size in bytes before and after the commit.
+
+However, the problem described in
+
+
+However, this means we can no longer rely on line-based diffing algorithms, akin to those used in TODO:GIT_DIFF_REF and must use an alternative method to measure the distance between revisions.
+
+
+
+  - Correlation between CD delta and complexity
+
+To mitigate these problems, we can use an alternative approach where we concatenate the entire state of the repository, makes the analysis resistant to renames, as we don't care about file names, we only care about the bytes contained in the commit. However, in this case, we can no longer rely on diffing the concatenated string. We need to use another approach to derive the information distance from before and after a commit.
 
 Normalized Compression Distance (NCD) is a way of measuring the similarity between two compressible objects, using lossless compression algorithms such as GZIP and ZStandard. It is a way of approximating the Normalized Information Distance and has widespread uses such as cluster analysis [https://arxiv.org/abs/cs/0312044], and it has even been used to train sentiment analysis.
 
 However, nobody has used normalized compression ratio as a distance metric in version controlled systems yet. The hypothesis of this work is that NCD-derived metrics could function as a complement to the more well-known LC and NoC metrics mentioned above, and be resilient to renaming.
 
-
-= Metric
-  - Correlation between CD delta and complexity
-
-
-
-  
 = Present method
+
+Q:  Why did we choose z standard? @cebrian2005common recommends 
+A: zstd has a large search window https://en.wikipedia.org/wiki/Zstd
+
 = Present implementation
 
 = Present experiments
 
 == Compression Distance vs. manual subjective classification
 
-
 == Compression Distance vs. semi automatic objective classification
 
 == Compression Distance aggregated over authors
 
+== Limitations of compression distance
+
+1. it's much slower to compute, 
+
+2. limited window size @cebrian2005common leading to distorted distance measurements, especially in worst case when comparing identical objects exceeding these size constraints. This means that we are back to just measuring something similar to the byte distance
+
 == Git Truck
+
 If you look beyond our bachelors project, where we all four worked on the project, you see that Dawid joined as a contributor during his master thesis. Af ter that, Thomas did his master thesis on the project as well, which is very 
