@@ -94,7 +94,7 @@ This paper investigates three research questions (RQs):
 
 == 1.3 Contributions & Paper Organization
 We make the following contributions:
-- We define Compression Distance (CD), a distance metric based on lossless compression, and derive its per-commit delta (ΔCD).
+- We define Compression Distance (CD), a distance metric based on lossless compression, and derive its per-commit delta ($#sym.Delta"CD"$).
 - We implement CD computation as API endpoints in the Git Truck analysis tool, leveraging ZStandard with a 2 MB search window.
 - We empirically evaluate CD on three projects (Git Truck, Commitizen, Twooter), showing strong correlation with LoCC, improved discrimination of commit types, and distinct author-level insights.
 
@@ -342,11 +342,11 @@ The tool works by concatenating the entire state of the repository and using los
 
 == 5.1 RQ1: CD vs. LoCC Correlation
 
-We evaluated whether per-commit ΔCD aligns with traditional complexity measured by Lines of Code Changed (LoCC). For each repository, we computed Spearman’s rank correlation coefficient (ρ) between ΔCD and LoCC across all commits.
+We evaluated whether per-commit $#sym.Delta"CD"$ aligns with traditional complexity measured by Lines of Code Changed (LoCC). For each repository, we computed Spearman’s rank correlation coefficient (ρ) between $#sym.Delta"CD"$ and LoCC across all commits.
 
 === 5.1.1 Correlation Results
 
-// Table 5.1.1: Spearman’s ρ between ΔCD and LoCC
+// Table 5.1.1: Spearman’s ρ between $#sym.Delta"CD"$ and LoCC
 *TODO: Add real data*
 #table(
   columns: 3,
@@ -357,7 +357,7 @@ We evaluated whether per-commit ΔCD aligns with traditional complexity measured
 )
 
 *TODO: Modify comment*
-All three projects show strong, statistically significant correlations (ρ ≥ 0.68, p < 0.001), indicating that ΔCD reliably tracks commit complexity in line with LoCC.
+All three projects show strong, statistically significant correlations (ρ ≥ 0.68, p < 0.001), indicating that $#sym.Delta"CD"$ reliably tracks commit complexity in line with LoCC.
 
 === 5.1.2 Aggregate Correlation
 
@@ -365,7 +365,7 @@ Combining data from all repositories, we obtain an overall ρ = 0.70 (p < 0.001)
 
 == 5.2 RQ2: Discrimination Across Commit Types
 
-=== 5.2.1 ΔCD Distributions by Category
+=== 5.2.1 $#sym.Delta"CD"$ Distributions by Category
 // Boxplots or violin plots for Test, Fix, Feat, Refactor, Style, Docs, etc.
 
 === 5.2.2 Statistical Significance Tests
@@ -381,7 +381,7 @@ Combining data from all repositories, we obtain an overall ρ = 0.70 (p < 0.001)
 
 *TODO: Analyze before / after Thomas DUckDB. Observe whether Dawid's work is squished down due to the new baseline commit*
 
-// We observe that Contributor Dawid has a much higher aggregate ΔCD than the original Bachelor’s-project authors, even though his LoCC total is comparable. This discrepancy corresponds to his later entry into the project during his Master’s thesis, at which point the codebase was already more substantial. Similarly, Thomas’s ΔCD is skewed upward because he joined even later for his own Master’s work. These timeline effects show how a growing baseline repository size can amplify ΔCD values for later-joining contributors.
+// We observe that Contributor Dawid has a much higher aggregate $#sym.Delta"CD"$ than the original Bachelor’s-project authors, even though his LoCC total is comparable. This discrepancy corresponds to his later entry into the project during his Master’s thesis, at which point the codebase was already more substantial. Similarly, Thomas’s $#sym.Delta"CD"$ is skewed upward because he joined even later for his own Master’s work. These timeline effects show how a growing baseline repository size can amplify $#sym.Delta"CD"$ values for later-joining contributors.
 
 
 
@@ -394,19 +394,19 @@ Intentional survivorship bias
 == 5.4 Sensitivity & Ablation
 
 === 5.4.1 Compression Window Size Impact
-// Results when zstd window < repo size; distortion patterns in ΔCD
+// Results when zstd window < repo size; distortion patterns in $#sym.Delta"CD"$
 
 === 5.4.2 File-Type Filter Effects
-// Compare ΔCD metrics including all files vs. code-only files
+// Compare $#sym.Delta"CD"$ metrics including all files vs. code-only files
 
 = 6 Discussion <sec:discussion>
 
 == 6.1 Interpretation of RQ1 Findings
-// Summarize what the correlation between ΔCD and LoCC tells us about CD’s representativeness
+// Summarize what the correlation between $#sym.Delta"CD"$ and LoCC tells us about CD’s representativeness
 // Discuss whether CD better captures complexity than LoCC and under what conditions
 
 == 6.2 Interpretation of RQ2 Findings
-// Explain how ΔCD varies across commit types (Test, Fix, Feat, etc.)
+// Explain how $#sym.Delta"CD"$ varies across commit types (Test, Fix, Feat, etc.)
 // Reflect on CD’s ability to discriminate intent compared to LoCC
 
 == 6.3 Interpretation of RQ3 Findings
