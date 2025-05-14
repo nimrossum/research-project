@@ -20,20 +20,13 @@
   date: datetime(year: 2025, month: 05, day: 15),
   abstract: [
     #text(weight: "bold")[Supervisor:] Mircea Lungu \<mlun\@itu.dk\>
-
-One line of context & the gap (why LoCC isn’t enough).
-
-One line of “what we did” (introduced CD).
-
-One line of your key quantitative result (e.g. correlation coefficients, discrimination power).
-
-One line of the take-home (“CD can serve as a complementary metric…“).
-
-*TODO*:
-- Add clear, concise statement of your key quantitative results (e.g. “We found that CD correlates at ρ = 0.72 with expert judgements, versus LoCC’s ρ = 0.45”).
-- No final “conclusion” sentence (“CD can serve as a complementary or alternative metric to LoCC in X contexts”).
-- A bit repetitive: the second paragraph largely restates the first.
-
+    *TODO*: Abstract
+    // - One line of context & the gap (why LoCC isn't enough).
+    // - One line of “what we did” (introduced CD).
+    // - One line of your key quantitative result (e.g. correlation coefficients, discrimination power).
+    //   - Add clear, concise statement of your key quantitative results (e.g. “We found that CD correlates at ρ = 0.72 with expert judgements, versus LoCC’s ρ = 0.45”).
+    // - One line of the take-home (“CD can serve as a complementary metric…“).
+    //   - No final “conclusion” sentence (“CD can serve as a complementary or alternative metric to LoCC in X contexts”).
   ],
   preface: [
     #align(center + horizon)[
@@ -114,7 +107,7 @@ The remainder of the paper is organized as follows. @sec:background reviews LoCC
 // - Why measuring software-change distance matters; common use of LoCC
 In the field of information theory, the concept of _information distance_ is used to quantify the similarity between two objects (TODO:REF). This is done by measuring the amount of information needed to transform one object into another. The most common way to measure this distance is by using a _distance metric_, which is a function that quantifies the difference between two objects.
 
-While there exists no perfect such metric, we can approximate the information distance between two objects using various practical techniques such as diffing and compression algorithms, as we will explore in this paper. 
+While there exists no perfect such metric, we can approximate the information distance between two objects using various practical techniques such as diffing and compression algorithms, as we will explore in this paper.
 
 === Lines of Code Changed as a measure of information distance
 
