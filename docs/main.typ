@@ -586,7 +586,7 @@ An empirical data study could show how much slower this metric is to compute, co
 
 === Scalability
 
-Attempting to run the tool on a large reposit or, like the source code for Linux @torvalds69:online yields a maxBuffer exceeded error:
+Attempting to run the tool on a large repository, like the source code for Linux @torvalds69:online yields a maxBuffer exceeded error:
 
 ```
 RangeError: stdout maxBuffer length exceeded
