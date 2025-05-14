@@ -96,7 +96,7 @@ _Lines of code_ (LoC) @Sourceli1:online is one of the most widely used distance 
 Since many projects employ version control systems, such as Git (TODO: Ref to Git), for keeping track of changes, we can track the _Lines of code changed_ (LoCC) over time using diffing algorithms. The LoCC metric is typically defined as the number of lines added and removed in a commit. (TODO: source?).
 This provides a measure of the information distance between revisions of a software system. Git includes this functionality by default (TODO: Ref numstat).
 
-This is a commonly used technique used to detect activity in software systems over time @goeminne2013analyzing. It can be used to assess team velocity, developer productivity and more. These metrics can be automatically obtained via version control systems using tools like Git Truck@hojelse2022git. LoCC is a useful metric for quantifying contributions or regions of interest in software systems over time and tools like Git Truck have proven the effectiveness in the analysis of software evolution @lungu2022can, @neyem2025exploring.
+This is a commonly used technique used to detect activity in software systems over time @goeminne2013analyzing. It can be used to assess team velocity, developer productivity and more. These metrics can be automatically obtained via version control systems using tools like Git Truck@hojelse2022git. LoCC is a useful metric for quantifying contributions or regions of interest in software systems over time and tools like Git Truck have shown the effectiveness in the analysis of software evolution @lungu2022can, @neyem2025exploring.
 
 = Shortcomings of LoCC
 
