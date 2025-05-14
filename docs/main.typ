@@ -126,7 +126,31 @@ Firstly, the term itself is ambiguous and subjective to the formatting of the co
 
 See the following ambiguous examples in @ambiguousListings. A few questions arise: should these snippets be counted as three separate lines of code or collapsed into a single line? In terms of actual work, a developer who writes either version is equally productive, yet if we simply count physical lines changed, the author of the first listing would be credited with three times the contribution of the second. This discrepancy shows how formatting alone can skew LoCC-based distance measures, as trivial style differences inflate the perceived distance between revisions and undermine the metric’s reliability.
 
-#include "assets/ambiguous-line-counts.typ"
+#figure(
+  caption: [Ambiguous line counts],
+  grid(
+    columns: (1fr, 1fr, 1fr),
+    gutter: 10pt,
+    rows: 60pt,
+    ```javascript
+    if (foo) {
+      bar();
+    }
+    ```,
+    ```javascript
+    if (foo) { bar(); }
+
+
+
+    ```,
+    ```javascript
+    if (foo) bar();
+
+
+
+    ```
+  ),
+) <ambiguousListings>
 
 // TODO: add source of how different tools have ambiguous definitions of lines
 
