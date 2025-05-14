@@ -20,7 +20,7 @@
   date: datetime(year: 2025, month: 05, day: 15),
   abstract: [
     #text(weight: "bold")[Supervisor:] Mircea Lungu \<mlun\@itu.dk\>
-    // TODO: ABSTRACT
+    *TODO: ABSTRACT*
   ],
   preface: [
     #align(center + horizon)[
@@ -71,11 +71,12 @@ This work proposes an alternative approach: Compression Distance (CD), a metric 
 
 Through a series of experiments, we evaluate the effectiveness of CD in quantifying code complexity, distinguishing between commit types, and mitigating biases present in LoCC.
 
+// TODO What does the results show?
 // The results suggest that CD provides a more nuanced and robust measure of software evolution, paving the way for its adoption in both academic research and industry practice.
 
 // TODO: Introduce compression distance, zstd, talk about search window size of zstd
 
-RQ1 *Is the compression distance using zstd a more representative metric for quantifying the complexity than lines of code changed?*
+RQ1 *Is the compression distance using zstd a more representative metric for quantifying the complexity of a version controlled software repository than lines of code changed?*
 
 RQ2 *To what extent does compression distance using zstd discriminate between manual or semi-automatic commit types (e.g. such as bugfix, feature, refactoring, documentation and style)?*
 
@@ -234,7 +235,7 @@ We used these endpoints to collect and visualize data about different repositori
 
 We chose to include/exclude certain file extensions, to focus the results on code files.
 
-In general, file extensions associated with code were included, while binary files like images, videos, and audio files were excluded.
+In general, file extensions commonly associated with code were included, while binary files like images, videos, and audio files as well as miscellaneous files were excluded.
 
 If any extensions were found that were neither included nor excluded, an automatic warning was reported in the console, in order to consider whether it should be included or excluded.
 
