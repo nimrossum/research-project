@@ -84,9 +84,6 @@ RQ3 *Does the compression distance using zstd suffer from the same limitations a
 
 =  Information distance and Similarity Distance Metrics in Software Engineering
 
-TODO: Write something here
-
-
 In the field of information theory, the concept of _information distance_ is used to quantify the similarity between two objects (TODO:REF). This is done by measuring the amount of information needed to transform one object into another. The most common way to measure this distance is by using a _distance metric_, which is a function that quantifies the difference between two objects.
 
 While there exists no perfect such metric, we can approximate the information distance between two objects using various practical techniques.
