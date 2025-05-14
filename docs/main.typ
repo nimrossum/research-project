@@ -265,9 +265,11 @@ However, nobody has used normalized compression ratio as a distance metric in ve
 
 == 4.1 Data collection
 
-During this project, we implemented several analysis tools exposed as an API endpoints in the Git Truck project. This was due to the foundation for performing analysis of commits were available in this project, to speed up the development of the tool.
+During this project, the analysis tools were implemented that were exposed as API endpoints in the Git Truck project. This was due to the foundation for performing analysis of commits were available in this project, to speed up the development of the tool.
 
 We used these endpoints to collect and visualize data about different repositories to draw conclusions about the Compression Distance metric.
+
+We also report the average time to analyze each repository over 10 warm and cold runs, to give an idea of the interactivity of such a tool. The tool caches file buffers when read using git.
 
 === 4.1.1 Repository Selection
 
@@ -279,61 +281,97 @@ multiple projects. List why chosen*
 
 // Which repos, commit counts, inclusion/exclusion rules
 // Table
-#table(
-  columns: 4,
-  table.header(
-    [*Project*],
-    [*Branch (commit)*],
-    [*Number of commits*],
-    [*Baseline commit buffer size (MB)*],
-  ),
-  [Git Truck@github-git-truck:online], "main (e2ba0de)", "1356", [0.36],
-  [Commitizen@github-commitizen:online], "main (e177141)", "1932", [0.77],
-  [Twooter@github-twooter:online], "master (2a6a407)", "234", [0.13],
-  // Zeeguu API | "master (???)", "???",
-)
+#figure(
+  caption: [Git repositories analyzed],
+  table(
+    // columns: (4.4cm, 2cm, 1.9cm, 0.9fr),
+    columns: 4,
+    align: (left, left, right, right, right),
+    [],
+    table.cell(
+      colspan: 2,
+      align: center,
+      [*Newest commit*]
+    ),
+    [],
+
+
+      [*Repository\@revision*],
+      [*Hash*],
+      [*Buffer size* \ ($"MB"$)],
+      [*Commits*],
+
+
+    [Git Truck\@ncd @github-git-truck:online], "bf46e09", $0.365$, "1356", // 383292/((2^10)^2) = 0.365535736
+    [Git Truck\@v2.0.4 @github-git-truck:online], "d385ace", $0.318$, "1260", //333644/((2^10)^2) = 0.318
+    [Git Truck\@v1.13.0 @github-git-truck:online], "71ae30d", $0.259$, "1242", // 270329/((2^10)^2) = 0.259
+    [Twooter\@main @github-twooter:online], "2a6a407", $0.133$, "234",
+    // 139376/((2^10)^2) = 0.133
+    [Commitizen\@master @github-commitizen:online], "e177141", $0.771$, "1977"
+    // 808691/((2^10)^2) = 0.771
+    // Zeeguu API | "master (???)", "???",
+  )
+) <git-repositories>
+
+From @git-repositories, we see that all the chosen repositories lie below the maximum of 1KB, which ensures  that backreferencing works as intended.
 
 === 4.1.2 File Inclusion/Exclusion
 // Specify which file extensions to include or drop, and how unrecognized types are handled.
 
 We chose to include/exclude certain file extensions, to focus the results on code files.
 
-In general, file extensions commonly associated with code were included, while binary files like images, videos, and audio files as well as miscellaneous files were excluded.
+In general, file extensions commonly associated with code were included, while binary files like images, videos, and audio files as well as miscellaneous files were excluded @gittruck0:online.
 
 If any extensions were found that were neither included nor excluded, an automatic warning was reported in the console, in order to consider whether it should be included or excluded.
 
 === 4.1.3 API Data retrieval
 
-The tool is able to go through a specified range of the history of a git repository $"repo=folder"$ going backwards $"count"=N|"Infinity"$ commits from the specified baseline commit or branch $"branch"=$ and compute metrics for each commit. The tool is, among other things, able to compute the Compression Distance in relation to the baseline commit, the newest commit in the repository.
+The tool is able to go through a specified range of the history of a git repository and compute metrics for each commit.
+
+The current version of the tool is as of writing not published yet and has to be run manually by cloning the source code.
+
+Queries be made using query parameters like so:
+Among other metrics, the endpoint is able to compute the Compression Distance in relation to the baseline commit, the newest commit at the given revision in the repository.
+
+- Repository can be specified using the $"repo=<folder>"$ parameter#footnote[The repo parameter refers to a specific git repository folder located relative to where the tools was downloaded.]
+- Baseline branch or revision is specified with the $"branch=<revision>"$ parameter.
+- Amount of commits to analyze is specified using the $"count"=N|"Infinity"$ parameter, going backwards from $"branch"$#footnote[Passing Infinity as count makes the tool go through all the commits in the repository.]
 
 To generate the data for this project, the following queries were used:
 
-http://localhost:3000/get-commits/?repo=git-truck&branch=e2ba0de&count=Infinity
+http://localhost:3000/get-commits/?repo=git-truck&branch=ncd&count=Infinity
 
-http://localhost:3000/get-commits/?repo=commitizen&branch=e177141&count=Infinity
+http://localhost:3000/get-commits/?repo=git-truck&branch=v2.0.4&count=Infinity
 
-http://localhost:3000/get-commits/?repo=twooter&branch=2a6a407&count=Infinity
+http://localhost:3000/get-commits/?repo=git-truck&branch=v1.13.0&count=Infinity
 
-The repo parameter refers to a specific git repository folder located relative to where the tools was downloaded.
+http://localhost:3000/get-commits/?repo=twooter&branch=main&count=Infinity
 
-Passing Infinity as count makes the tool go through all the commits in the repository.
+http://localhost:3000/get-commits/?repo=commitizen&branch=master&count=Infinity
 
+This produces a CSV output that can be processed in a data processing tool. During this project, Google Sheets was used for this purpose. Useful information and progress updates is reported in the console.
 
 == 4.2 Metric Computation
 
+In this section, we describe the detailed steps to compute Compression Distance (CD) for each commit. The process is divided into four sub-sections:
+
 === 4.2.1 Concatenated Commit Buffer (CCB) Construction
 // Describe how you assemble the full-repository byte string per commit.
+We begin by constructing a concatenated commit buffer (CCB) for every commit, reading all the file contents into a single buffer. The contents of the files are obtained via the `git cat-file <blob hash>` command and reading the standard output of the command.
 
 === 4.2.2 Compression Setup
 // zstd version, compression level (3), window size 2^21 B, memory limits.
 
-For compression the commit buffers,
-Q: Why did we choose z standard? @cebrian2005common recommends PPMZ
-A: zstd has a large search window https://en.wikipedia.org/wiki/Zstd
+Next, we compress each CCB and its paired baseline buffer using ZStandard (zstd) @zstdlibc51:online. We then calculate the Compression Distance as
+
+$#sym.Delta"CD"(x,y) = |Z(x)| - |Z(x #sym.union y)|$,
+
+where $Z$ is a compression function, $x$ is the CBB and $y$ is the baseline $"CBB"$.
 
 The ZStandard compression algorithm (zstd) @facebook31:online, has a window log of 21 @zstdlibc51:online for its default 3 level compression, making the window size $2^21 = 2"MB"$. This makes the it suitable for this task, as long as you are aware of the limit and remember to adjust it as needed.
 
 We used the default compression level of 3, which has a window size of $2^(21) B = 2 "MB"$.
+
 We checked that the repositories we used were smaller than half of this size#footnote("Due to compressing the newest commit buffer with each commit, meaning we need at least 2x the baseline buffer, assuming that no commit buffer is larger than the final buffer, but there is still some wiggle room for all of the projects, as none of them surpass 1 MB"), in order for the compression algorithm to consider the entire commit buffer when attempting to compress it.
 
 
@@ -366,7 +404,7 @@ The tool works by concatenating the entire state of the repository and using los
 
 == 5.1 RQ1: CD vs. LoCC Correlation
 
-We evaluated whether per-commit $#sym.Delta"CD"$ aligns with traditional complexity measured by Lines of Code Changed (LoCC). For each repository, we computed Spearman’s rank correlation coefficient (ρ) between $#sym.Delta"CD"$ and LoCC across all commits.
+We evaluated whether per-commit $#sym.Delta"CD"$ aligns with traditional complexity measured by Lines of Code Changed (LoCC). For each repository, we computed the coefficient of determination, $R^2$, between $#sym.Delta"CD"$ and LoCC across all commits.
 
 === 5.1.1 Correlation Results
 
