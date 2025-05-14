@@ -7,10 +7,10 @@
 #codly(
   languages: (
     rust: (name: "Rust", color: rgb("#CE412B")),
-    sh: (name: "Terminal", color: rgb("#000000"))
+    sh: (name: "Terminal", color: rgb("#000000")),
   ),
   number-format: none,
-  display-name: false
+  display-name: false,
 )
 #set text(lang: "en")
 
@@ -20,7 +20,7 @@
   date: datetime(year: 2025, month: 05, day: 15),
   abstract: [
     #text(weight: "bold")[Supervisor:] Mircea Lungu \<mlun\@itu.dk\>
-  // TODO: ABSTRACT
+    // TODO: ABSTRACT
   ],
   preface: [
     #align(center + horizon)[
@@ -31,7 +31,7 @@
           \
           \
           —  Plutarch, Life of Theseus 23.1
-        ]
+        ],
       )
       \
       \
@@ -50,7 +50,8 @@
       #box(
         width: 94mm,
         [
-I would like to thank Christian Gram Kalhauge \<chrg\@dtu.dk\> for proposing the idea for this project and for his valuable external supervision and guidance.])
+          I would like to thank Christian Gram Kalhauge \<chrg\@dtu.dk\> for proposing the idea for this project and for his valuable external supervision and guidance.],
+      )
 
 
 
@@ -64,7 +65,7 @@ I would like to thank Christian Gram Kalhauge \<chrg\@dtu.dk\> for proposing the
 
 = Introduction
 
-Software engineering has consistently explored metrics to measure and compare the complexity and evolution of software systems. Among these, Lines of Code Changed (LoCC) has become a commonly used measure, providing insights into developer productivity and team velocity. However, as this paper will show, LoCC has limitations that needs to be considered when interpreting its results. In this paper, we will explore the shortcomings of LoCC and propose an alternative metric: Compression Distance (CD), derived from lossless compression algorithms with large search windows. By measuring the compressibility of changes between software revisions, CD offers a novel perspective on software evolution, addressing many of the shortcomings inherent in LoCC.
+Software engineering has consistently explored metrics to measure and compare the complexity and evolution of software systems. Number of issues closed, number of pull requests merged, lines of code changed. Among these, Lines of Code Changed (LoCC) has become a commonly used measure, providing insights into developer productivity and team velocity. However, as this paper will show, LoCC has limitations that needs to be considered when interpreting its results. In this paper, we will explore the shortcomings of LoCC and propose an alternative metric: Compression Distance (CD), derived from lossless compression algorithms with large search windows. By measuring the compressibility of changes between software revisions, CD offers a novel perspective on software evolution, addressing many of the shortcomings inherent in LoCC.
 
 This work proposes an alternative approach: Compression Distance (CD), a metric derived from lossless compression algorithms such as ZStandard (zstd) with large search windows. By measuring the compressibility of changes between software revisions, CD offers a novel perspective on software evolution, addressing many of the shortcomings inherent in LoCC. This paper explores the theoretical underpinnings of CD, its practical implementation, and its potential to complement or even replace traditional metrics in certain contexts.
 
@@ -80,17 +81,16 @@ RQ2 *To what extent does compression distance using zstd discriminate between ma
 
 RQ3 *Does the compression distance using zstd suffer from the same limitations as lines of code changed in quantifying the contributions of developers?*
 
-= Introduction to Similarity Distance Metrics
+=  Information distance and Similarity Distance Metrics in Software Engineering
 
+TODO: Write something here
 
-
-== Information distance
 
 In the field of information theory, the concept of _information distance_ is used to quantify the similarity between two objects (TODO:REF). This is done by measuring the amount of information needed to transform one object into another. The most common way to measure this distance is by using a _distance metric_, which is a function that quantifies the difference between two objects.
 
 While there exists no perfect such metric, we can approximate the information distance between two objects using various practical techniques.
 
-== Lines of Code Changed as a measure of information distance
+= Lines of Code Changed as a measure of information distance
 
 _Lines of code_ (LoC) @Sourceli1:online is one of the most widely used distance metrics in the software industry @nguyen2007sloc. It is often used as a measure of software complexity, maintainability, and productivity.
 
@@ -110,7 +110,7 @@ Firstly, the term itself is ambiguous and subjective to the formatting of the co
 
 See the following ambiguous examples in @ambiguousListings. A few questions arise: should these snippets be counted as three separate lines of code or collapsed into a single line? In terms of actual work, a developer who writes either version is equally productive, yet if we simply count physical lines changed, the author of the first listing would be credited with three times the contribution of the second. This discrepancy shows how formatting alone can skew LoCC-based distance measures, as trivial style differences inflate the perceived distance between revisions and undermine the metric’s reliability.
 
-#include("assets/ambiguous-line-counts.typ")
+#include "assets/ambiguous-line-counts.typ"
 
 // TODO: add source of how different tools have ambiguous definitions of lines
 
@@ -135,16 +135,19 @@ These kinds of changes do not directly reflect genuine development effort, but t
 
 Tools like Git Truck track the LoCC through the entire history of a project by default, weighing ancient changes as much as recent changes. In the development of Git Truck, this was attempted to be mitigated by looking at blame information#footnote[https://github.com/git-truck/git-truck/commit/12582272b5854d6bf23706b292f3519750023fdd] instead and only considering how the files that are still present in the system as of today has changed through time. However, this technique is still prone to the errors introduced by the problem stated in @renamePitfalls. Another attempt to solve this was the introduction of the time range slider#footnote[https://github.com/git-truck/git-truck/pull/731], which led the user select a duration of time to analyze and "forget the past".
 
-= Mitigating the problems of LoCC using Compression Distance
-// This chapter is very rough
+= Compression Distance and Mitigating the problems of LoCC
+
+To mitigate the explored problems with LoCC, we can use a different approach to measure the distance between revisions of a software system. Instead of relying on the number of lines changed, we can use a metric derived from lossless compression algorithms, to measure the distance between revisions.
+
+== Mitigating the problem of ambiguous definitions of LoCC and rename-detection pitfalls
 
 To mitigate the ambiguity described in @loccDef, we can instead consider the change in the number of bytes instead of LoCC as a quantifier of developer activity.
 
 However, this means we can no longer rely on line-based diffing algorithms, akin to those used in TODO:GIT_DIFF_REF and must use an alternative method to measure the distance between revisions.
 
-We can mitigate the problem with renames by concatenate all the files existing in each commit, the concatenated commit buffer, measuring its size of the project before and after the commit to calculate a *byte distance metric*.
+We can mitigate the problem with ambiguity and renames by concatenating all the files existing in each commit. We will refer to this as the concatenated commit buffer, $"CCB"$. We can measure its size before and after the commit to calculate a *byte distance metric*, see @byte-distance-metric.
 
-$#sym.Delta|R| = |x| - |x-1|$
+$#sym.Delta|R| = |x| - |x-1|$ <byte-distance-metric>
 
 where $#sym.Delta|R|$ is the distance in bytes, $|x|$ is the size of the given commit buffer and $x-1$ is the size of the previous commit buffer.
 
@@ -152,14 +155,27 @@ This method does not address the problem with automatic actions overstating deve
 
 This leads us to the Compression Distance.
 
-== Compression Distance
+== Mitigating the problem of automation-driven LoCC spikes
 
-Instead of measuring the static distance in bytes before and after the commit, we can instead measure the compression of the changes we added. Using a lossless compression algorithm, we compress the concatenation of the given commit buffer $x$ with the newest revision of the project $y$ and compare this value with the one for the previous commit $x-1$. The hypothesis being that this would make it such that large repetitive actions would have a lower impact, since they would compress better than smaller, but more complex changes. This assumes that the changes added in a commit will compress better in the presence of similar code. This requires the compression algorithm to have large search window, as explored in @cebrian2005common. This is the case for the ZStandard compression algorithm (zstd) @facebook31:online, which has for the default level 3 compression has a window log of 21 @zstdlibc51:online making the window size $2^21 = 2"MB"$, making it suitable for this task, as long as you are aware of the limit and remember to adjust it as needed.
+Instead of measuring the static distance in bytes before and after the commit, we can instead try to measure the compression of the changes we added. Using a lossless compression algorithm, we compress the concatenation of the given commit buffer $x$ with the newest revision of the project $y$ and compare this value with the one for the previous commit $x-1$. The hypothesis being that this would make it such that large repetitive actions would have a lower impact, since they would compress better than smaller, but more complex changes. This assumes that the changes added in a commit will compress better in the presence of similar code. This requires the compression algorithm to have search window larger than double the size of the project files we intend to analyze, as explored in @cebrian2005common.
+
+
+== Choice of compression algorithm
+
+For compression the commit buffers,
+Q: Why did we choose z standard? @cebrian2005common recommends PPMZ
+A: zstd has a large search window https://en.wikipedia.org/wiki/Zstd
+
+=== ZStandard compression algorithm
+
+The ZStandard compression algorithm (zstd) @facebook31:online, has a window log of 21 @zstdlibc51:online for its default 3 level compression, making the window size $2^21 = 2"MB"$. This makes the it suitable for this task, as long as you are aware of the limit and remember to adjust it as needed.
+
+== Definition of Compression Distance
 
 We define the Compression Distance $"CD"$ metric as a measure of how much a given concatenated commit buffer compresses with the baseline commit buffer:
 
 $
-"CD"(x, y) = |Z(x)| - |Z(x #sym.union y)|
+  "CD"(x, y) = |Z(x)| - |Z(x #sym.union y)|
 $ <def:compression_distance>
 
 where $"CD"$ is the compression distance, $x$ is the given concatenated commit buffer and $"Z"$ is a lossless compression algorithm.
@@ -167,7 +183,7 @@ where $"CD"$ is the compression distance, $x$ is the given concatenated commit b
 Now we can define the impact of the commit $#sym.Delta"CD"$, compared to the previous commit buffer, giving us
 
 $
-#sym.Delta "CD" = "CD"(x) - "CD"(x-1)
+  #sym.Delta "CD" = "CD"(x) - "CD"(x-1)
 $ <def:compression_distance_delta>
 
 Unlike the normalized compression distance, this metric is not bounded and is dependent on the absolute sizes of the compressed files. This is fine in this scenario, as we want to compare commits in the same project and the magnitude of the compression distance tells us an interesting story about the impact of the commit.
@@ -176,7 +192,10 @@ Then, we can compute the change in the size in bytes before and after the commit
 
 // Describe the method, how we compare the distance to the newest version
 
-If we attempt to compress the commit buffers in presence of the newest commit buffer of the repository, we get the side effect of introducing survivorship bias into the system. By measuring the compressed distance to the newest commit buffer of the project, we value changes that are more akin to the newest version higher, in order  to tell a story about how we got to the newest version and which commits were the most influential in getting there. This might not be what you want, but for some purposes this makes a lot of sense, as long as you keep the survivorship bias in mind. For example, a detour in the project that didn't make it in the newest version is weighted by a negative distance // TODO: Show a commit from twooter (yoink) that has a negative distance
+If we attempt to compress the commit buffers in presence of the newest commit buffer of the repository, we get the side effect of introducing survivorship bias into the system. By measuring the compressed distance to the newest commit buffer of the project, we value changes that are more akin to the newest version higher, in order to tell a story about how we got to the newest version and which commits were the most influential in getting there. This might not be what you want, but for some purposes this makes a lot of sense, as long as you keep the survivorship bias in mind. For example, a detour in the project that didn't make it in the newest version is weighted by a negative distance
+
+*TODO: Show a commit from twooter (yoink) that has a negative distance*
+
 , telling us this brought the project further away from the newest version, but it might still have been a valuable journey to take. Making "mistakes" is what move projects forward, since you might realize what _not_ to do, in order to find out what _to do_. // might remove the last bit here
 
 // Figure showing spectrum of CD delta
@@ -203,30 +222,72 @@ However, nobody has used normalized compression ratio as a distance metric in ve
 
 
 
+= Methodology
+
+During this project, we implemented several analysis tools exposed as an API endpoints in the Git Truck project. This was due to the foundation for performing analysis of commits were available in this project, to speed up the development of the tool.
+
+We used these endpoints to collect and visualize data about different repositories to draw conclusions about the Compression Distance metric.
+
+*TODO: If also talking about NCD, write about it here*
+
+== Included file extensions
+
+We chose to include/exclude certain file extensions, to focus the results on code files.
+
+In general, file extensions associated with code were included, while binary files like images, videos, and audio files were excluded.
+
+If any extensions were found that were neither included nor excluded, an automatic warning was reported in the console, in order to consider whether it should be included or excluded.
+
+We used the default compression level of 3, which has a window size of $2^(21) B = 2 "MB"$.
+We checked that the repositories we used were smaller than half of this size#footnote("Due to compressing the newest commit buffer with each commit, meaning we need at least 2x the baseline buffer, assuming that no commit buffer is larger than the final buffer, but there is still some wiggle room for all of the projects, as none of them surpass 1 MB"), in order for the compression algorithm to consider the entire commit buffer when attempting to compress it.
 
 
 
-= Present method
+= Implementation: Get Commits endpoint
 
-Q:  Why did we choose z standard? @cebrian2005common recommends
-A: zstd has a large search window https://en.wikipedia.org/wiki/Zstd
+The tool is able to go through a specified range of the history of a git repository $"repo=folder"$ going backwards $"count"=N|"Infinity"$ commits from the specified baseline commit or branch $"branch"=$ and compute metrics for each commit. The tool is, among other things, able to compute the Compression Distance in relation to the baseline commit, the newest commit in the repository.
+
+To generate the data for this project, the following queries were used:
+
+http://localhost:3000/get-commits/?repo=git-truck&branch=e2ba0de&count=Infinity
+
+http://localhost:3000/get-commits/?repo=commitizen&branch=e177141&count=Infinity
+
+http://localhost:3000/get-commits/?repo=twooter&branch=2a6a407&count=Infinity
+
+The repo parameter refers to a specific git repository folder located relative to where the tools was downloaded.
+
+Passing Infinity as count makes the tool go through all the commits in the repository.
+
+The tool works by concatenating the entire state of the repository and using lossless compression algorithms to measure the distance between commits. From the compression distance, we can derive the $#sym.Delta "CD"$.
+
+
+== NCD
 
 According to @cebrian2005common, NCD is a very good distance measurement, when used in the proper
 way.
 
-= Present implementation
-
 = Present experiments
 
-Present test cases
+
+== Test cases
+
+// buffer size $|S|/(2^10)^2$ (MB)
 
 // Table
-| Project | Baseline commit buffer size
-|Git Truck |
-|Commitizen |
-|Twooter |
-Size 20
-
+#table(
+  columns: 4,
+  table.header(
+    [*Project*],
+    [*Branch (commit)*],
+    [*Number of commits*],
+    [*Baseline commit buffer size (MB)*],
+  ),
+  [Git Truck@github-git-truck:online], "main (e2ba0de)", "1356", [0.36],
+  [Commitizen@github-commitizen:online], "main (e177141)", "1932", [0.77],
+  [Twooter@github-twooter:online], "master (2a6a407)", "234", [0.13],
+  // Zeeguu API | "master (???)", "???",
+)
 time intervals that are meaningful:
 git truck before hand in, multiple intervals
 multiple projects
@@ -238,9 +299,17 @@ multiple projects
 
 To answer RQ1
 
-  - Correlation between CD delta and complexity
+- Correlation between CD delta and complexity
 
 == Compression Distance vs. semi automatic objective classification
+
+Commit message often convey the intent of the commit, and can be used to semi automatically classify the commit into different categories. Some repositories even use tools like Commitizen *TODO: Add REF* to enforce a commit message format, from which it is trivial to derive the commit type.
+
+For this experiment we therefore use keyword searching to classify the commit messages into different categories. We use the following categories:
+
+Test Build Fix Bump Feat Refactor Style Docs
+
+
 
 To answer RQ2
 
@@ -250,13 +319,11 @@ To answer RQ2
 
 To answer RQ3
 
-http://localhost:3000/get-commits/?repo=git-truck&branch=645333e46ceea6abd5ee1d4a0cb2c605bd959725&count=Infinity
-http://localhost:3000/get-commits/?repo=git-truck&count=Infinity
 
 === Observations
 
 "Reasons for skews:
- - Code that was deleted again and no longer present in final version"
+- Code that was deleted again and no longer present in final version"
 Intentional survivorship bias
 == Limitations of compression distance
 
@@ -267,3 +334,8 @@ Intentional survivorship bias
 == Git Truck
 
 If you look beyond our bachelors project, where we all four worked on the project, you see that Dawid joined as a contributor during his master thesis. After that, Thomas did his master thesis on the project as well, which is very
+
+== Considerations - what does it matter for end users
+
+While measuring automatic velocity is a good idea, it is not the only thing to consider.
+For a user facing project, it is important to also consider the user experience and the impact of changes on the end users. Some small bugfix might have a small impact on the code, but a large impact on the end user.
