@@ -26,7 +26,7 @@
     \
     \
     #text[
-      Lines of code changed (LoCC) is one of the most widely used distance metrics in the software industry, but it suffers from several key drawbacks that can mislead when analyzing developer effort and project activity. In this paper, we explore the shortcomings of LoCC and propose an alternative metric: Compression Distance,  derived from Normalized Compression Distance (NCD) and lossless compression algorithms with large search windows. Formally, $"CD"(x,y) = |C(x #sym.union y)| - |C(x)|$, where $|C(#sym.dot)|$ denotes the compressed size. The results suggest that CD provides a more nuanced and robust measure of software evolution, to be used as a complementary metric to proven metrics like LoCC, while being aware of the biases in the metric.
+      Lines of code changed (LoCC) is one of the most widely used distance metrics in the software industry, but it suffers from several key drawbacks that can mislead when analyzing developer effort and project activity. In this paper, we explore the shortcomings of LoCC and propose an alternative metric: Compression Distance,  derived from Normalized Compression Distance (NCD). Formally, $"CD"(x,y) = |C(x #sym.union y)| - |C(x)|$, where $|C(#sym.dot)|$ denotes the compressed size. The results suggest that CD provides a more nuanced and robust measure of software evolution, to be used as a complementary metric to proven metrics like LoCC, while being aware of the biases in the metric.
     ]
   ],
   preface: [
@@ -53,7 +53,7 @@
 
 Software engineering has consistently explored metrics to measure and compare the complexity and evolution of software systems. Being able to quantify the impact of code changes in software systems is central to understanding software evolution, team productivity, and system complexity. There are many ways to quantify the impact of code changes. Among these, _Lines of code changed_ (LoCC) @Sourceli1:online is one of the most widely used distance metrics in the software industry @nguyen2007sloc. It is often used as a measure of software complexity, maintainability, and productivity.
 
-While LoCC is simple to compute and interpret, it suffers from several key drawbacks that can mislead when analyzing developer effort and project activity. In this paper, we will explore the shortcomings of LoCC and propose an alternative metric: Compression Distance (CD), derived from lossless compression algorithms with large search windows. By measuring the compressibility of changes between software revisions, CD offers a novel perspective on software evolution, addressing many of the shortcomings inherent in LoCC.
+While LoCC is simple to compute and interpret, it suffers from several key drawbacks that can mislead when analyzing developer effort and project activity. In this paper, we will explore the shortcomings of LoCC and propose an alternative metric: Compression Distance (CD). By measuring the compressibility of changes between software revisions, CD offers a novel perspective on software evolution, addressing many of the shortcomings inherent in LoCC.
 
 == Research Questions <researchQuestions>
 This paper investigates three research questions:
