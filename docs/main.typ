@@ -61,9 +61,9 @@ Through a series of experiments, we evaluate the effectiveness of CD in quantify
 The results suggest that CD provides a more nuanced and robust measure of software evolution, paving the way for its adoption in both academic research and industry practice. However, you need to be aware of built in biases in the metric.
 
 == Research Questions <researchQuestions>
-This paper investigates three research questions (RQs):
+This paper investigates three research questions:
 - RQ1: Is the compression distance a more representative metric for quantifying the complexity of a version-controlled software repository than LoCC?
-- RQ2: To what extent does compression distance discriminate between manual or semi-automatic commit types (e.g., bugfix, feature, refactoring, documentation, style)?
+- RQ2: To what extent does compression distance discriminate between manual or semi-automatic commit types (e.g., bug fix, feature, refactoring, documentation, style)?
 - RQ3: Does compression distance suffer from the same limitations as LoCC in quantifying the contributions of developers?
 
 
@@ -224,14 +224,13 @@ During this project, the analysis tools were implemented as API endpoints expose
 
 We used these endpoints to collect and visualize data about different repositories to draw conclusions about the Compression Distance metric.
 
-=== Repository Selection
+=== Repository Selection <repositorySelection>
 
 For the analysis of this project, two differently sized projects were chosen. Git Truck was chosen, as we were familiar with its history and knew that an attempt was made to conform to good practices of making git commits, such as using the imperative mood etc., which made categorizing the commits simpler. Commitizen was chosen as well, due to its nature of conforming to the use of Conventional Commits @Conventi81:online, which automatically could be categorized.
 
 The different versions of Git Truck where chosen due to the known time periods on which the project was worked on by a previously known set of contributors.
 
-From @git-repositories, we see that all the chosen repositories lie below the maximum of 1MB, which ensures that sliding search window of the compression algorithm is able to take the repositories in their entireties into account, as mentioned in @NCD.
-
+From @git-repositories, all the chosen repositories lie below the maximum of 1MB for level 3 zstd compression (see @compressionSetup for more details).
 
 #figure(
   caption: [Git repositories and revisions that were chosen for this project and some of their properties],
@@ -239,7 +238,7 @@ From @git-repositories, we see that all the chosen repositories lie below the ma
     // columns: (4.4cm, 2cm, 1.9cm, 0.9fr),
     columns: 4,
     align: (left, left, right, right, right),
-
+  
     [*Repository\@revision*],
     [*Commits*],
     [*Hash*],
@@ -254,7 +253,7 @@ From @git-repositories, we see that all the chosen repositories lie below the ma
 === File Inclusion/Exclusion
 // Specify which file extensions to include or drop, and how unrecognized types are handled.
 
-We chose to include/exclude certain file extensions, to focus the results on code files.
+Certain file extensions were included/excluded, to focus the results on code files.
 
 In general, file extensions commonly associated with code were included, while binary files like images, videos, and audio files as well as miscellaneous files were excluded @gittruck0:online.
 
@@ -290,57 +289,47 @@ This produces a CSV output that can be processed in a data processing tool. Duri
 
 == Metric Computation
 
-In this section, we describe the detailed steps to compute Compression Distance (CD) for each commit. The process is divided into four sub-sections:
+In this section, the steps to compute Compression Distance (CD) for each commit is described. The process is divided into four sub-sections:
 
 === Concatenated Commit Buffer (CCB) Construction
 // Describe how you assemble the full-repository byte string per commit.
-We begin by constructing a concatenated commit buffer (CCB) for every commit, reading all the file contents into a single buffer. The contents of the files are obtained via the `git cat-file <blob hash>` command and reading the standard output of the command.
+A concatenated commit buffer (CCB) was constructed for every commit, reading all the file contents into a single buffer. The contents of the files were obtained by calling the `git cat-file <blob hash>` command and reading the standard output of the command into buffers. For each commit buffer, a second buffer was created by concatenating with the newest revision buffer, in order to create the components needed for @def:compression_distance.
 
-=== Compression Setup
+=== Compression Setup <compressionSetup>
 // zstd version, compression level (3), window size 2^21 B, memory limits.
 
-Next, we compress each CCB and its paired baseline buffer using ZStandard (zstd) @zstdlibc51:online.
-
-The ZStandard compression algorithm (zstd) @facebook31:online, has a window log of 21 @zstdlibc51:online for its default 3 level compression, making the window size $2^21 = 2"MB"$. This makes zstd suitable for this task, as long as you are aware of the limit and remember to adjust it as needed.
-
-We used the default compression level of 3, which has a window size of $2^(21) B = 2 "MB"$.
-
-We checked that the repositories we used were smaller than half of this size#footnote("Due to compressing the newest commit buffer with each commit, meaning we need at least 2x the baseline buffer, assuming that no commit buffer is larger than the final buffer, but there is still some wiggle room for all of the projects, as none of them surpass 1 MB"), in order for the compression algorithm to consider the entire commit buffer when attempting to compress it.
-
+Each CCB was compressed using ZStandard (zstd) @zstdlibc51:online. The ZStandard compression algorithm (zstd) @facebook31:online, has a window log of 21 @zstdlibc51:online for its default 3 level compression, making the window size $2^21 = 2"MB"$. This makes zstd suitable for this task, as long as you are aware of the limit and remember to adjust it as needed. As mentioned in @repositorySelection, it was ensured that the repositories used were smaller than half of this size#footnote("Due to compressing the newest commit buffer with each commit, meaning that a window size of at least 2x the baseline buffer was needed, assuming that no commit buffer is larger than the final buffer"), to ensure that the sliding search window of the compression algorithm was able to take the entire commit buffer into account
 
 === Calculating $"CD"$ & $#sym.Delta"CD"$
 
-We then calculate the Compression Distance using @def:compression_distance. Then, to get the compressed distance contribution for each commit, we simply subtract it with the compression distance from the previous commit as seen in @def:compression_distance_delta.
-
-This method adds intentional survivorship bias into the metric, favoring code that is more easily compressible with the final version.
+The Compression Distance was calculated using @def:compression_distance. Then, to get the compressed distance contribution for each commit, the compression distance from the previous commit as seen in @def:compression_distance_delta was subtracted from the compression distance for the current commit. This method adds intentional survivorship bias into the metric, favoring code that is more easily compressible with the final version.
 
 == Commit Classification
 
-Using keyword searching, we were able to categorize the many of the commits automatically. For the Commitizen repository, all the commits were automatically categorized due to the nature of conforming to Conventional Commits. We used the following keywords for categorizing the commits:
+Using keyword searching, it was possible to categorize the many of the commits automatically. For the Commitizen repository, all the commits were automatically categorized due to the nature of conforming to Conventional Commits. The following keywords for categorizing the commits were used:
 
-For Commitizen, we used: Test, Fix, Feat, Refactor, Style, Docs, as
+- For Commitizen, the standard keywords from Conventional Commits were used: *Test, Fix, Feat, Refactor, Style and Docs*.
 
-For Git Truck, we used: Bump, Refactor, Fix, Feature.
+- For Git Truck, these keywords were used: *Bump, Refactor, Fix, Feature*.
 
 == Statistical Analysis
 // Methods: Spearman's ρ, regression, boxplots; significance tests; tools/libraries used.
 
-We evaluated whether per-commit $#sym.Delta"CD"$ aligns with traditional complexity measured by LoCC. For each repository, we created log-log scatter plots with linear trend-lines and computed the coefficient of determination, $R^2$, between $#sym.Delta"CD"$ and LoCC across all commits.
-
+It was evaluated whether per-commit $#sym.Delta"CD"$ align with traditional complexity measured by LoCC. For each repository, a log-log scatter plot with regression trend-lines was created. From the trend-lines, the coefficient of determination was computed, $R^2$, between $#sym.Delta"CD"$ and LoCC across all commits.
 
 = Results <sec:results>
 
 In this section, we will explore whether we have answered the research questions presented in @researchQuestions, provided here for convenience:
 
 - RQ1: Is the compression distance a more representative metric for quantifying the complexity of a version-controlled software repository than LoCC?
-- RQ2: To what extent does compression distance discriminate between manual or semi-automatic commit types (e.g., bugfix, feature, refactoring, documentation, style)?
+- RQ2: To what extent does compression distance discriminate between manual or semi-automatic commit types (e.g., bug fix, feature, refactoring, documentation, style)?
 - RQ3: Does compression distance suffer from the same limitations as LoCC in quantifying the contributions of developers?
 
 The data used to answer these questions is published in Google Sheets @Research78:online, @Subjecti71:online.
 
 == RQ1: LoCC vs. $#sym.Delta"CD"$ Correlation <RQ1Findings>
 
-To answer RQ1, we will explore newest version of each repository and see how the CD metric correlates with LoCC.
+To answer RQ1, the newest version of each repository is explored to see how the $#sym.Delta"CD"$ metric correlates with LoCC.
 
 === Correlation Results
 
@@ -355,30 +344,27 @@ To answer RQ1, we will explore newest version of each repository and see how the
   ),
 ) <loccVsDeltaCompDist>
 
-From @loccVsDeltaCompDist, it seems that for Git Truck, there exists a linear correlation between LoCC and $#sym.Delta"CD"$, however for Commitizen, a power regression produces a better correlation.
+From @loccVsDeltaCompDist, it seems that for Git Truck, there exists a slight linear correlation between LoCC and $#sym.Delta"CD"$, however for Commitizen, a power regression produces a better correlation.
 
 == RQ2: Discrimination Across Commit Types <RQ2Findings>
 
 === $#sym.Delta"CD"$ Distributions by Category
 
-For this experiment, we will look at the Commitizen repository.
-If we plot each category of commit as a series on a log-log scatter-plot, we can see some interesting patterns. See @commitizenDeltaCompDistVSLoCC.
+For this experiment, the Commitizen repository will be considered. If each category of commits are plotted as series on a log-log scatter-plot, some interesting patterns can be seen. See @commitizenDeltaCompDistVSLoCC.
 
 #figure(
   caption: [Log-log scatter-plot of commits in the Commitizen repository, with automatically categorized commits],
   image("assets/commitizenCD∆ vs LoCC.svg"),
 ) <commitizenDeltaCompDistVSLoCC>
 
-From the plot, we can see that bug fix commits specifically has a tendency to have a lower $#sym.Delta"CD"$ metric.
-
-We can also see that version bumps vary much less in impact compared to the other categories.
+From the plot, it can be seen that bug fix commits specifically has a tendency to have a lower $#sym.Delta"CD"$ metric. It can also be seen that version bumps vary much less in impact compared to the other categories.
 Feature commits generally have a larger LoCC than other commits, and might contain more novel code that compress less, compared to bug fixes.
 
 == RQ3: Developer Contribution Analysis <RQ3Findings>
 
 For this experiment, we will look at the Git Truck repository across two time periods and see whether survivorship bias plays a role in $#sym.Delta"CD"$.
 
-We accumulate the byte distance, LoCC and $#sym.Delta"CD"$ for each developer throughout the two time periods.
+The byte distance, LoCC and $#sym.Delta"CD"$ is accumulated for each developer throughout the two time periods.
 
 We then aggregate each metric for each contributor throughout the history of the repository.
 
@@ -457,7 +443,7 @@ See @beforeAndAfterTThesis for the distribution over cumulative byte distance, L
 
 === 5.3.3 Observations: Survivorship Bias Skew
 
-We observe that before Thomas worked intensively on the project, his contribution distributions measured in LoCC and $#sym.Delta"CD"$ were fairly close, however, after his thesis, his share of accumulated $#sym.Delta"CD"$ equalized with that of Jonas.
+Before Thomas worked intensively on the Git Truck project, his contribution distributions measured in LoCC and $#sym.Delta"CD"$ were fairly close in value, however, after writing his thesis, Thomas' share of accumulated $#sym.Delta"CD"$ equalized with that of Jonas.
 
 This is also clear to see on the area time series charts in @beforeAndAfterTThesisTimeSeries. We can see that using the $#sym.Delta"CD"$ metric, Thomas is able to surpass Jonas in the author distribution. We can also clearly see when Thomas merged his master thesis into the repository and that the merge technique was squashing all of the commits into one, hence the big spike upwards and long period of few commits. This clearly illustrates the information that is lost when developers choose squash merging over regular merges or rebase merging strategies. This is a limitation that neither LoCC, $#sym.Delta"CD"$ or any other metric can preserve, unless the commits are recovered by rebasing them back into the branch.
 
@@ -467,13 +453,13 @@ This is also clear to see on the area time series charts in @beforeAndAfterTThes
 // Summarize what the correlation between $#sym.Delta"CD"$ and LoCC tells us about CD's representativeness
 // Discuss whether CD better captures complexity than LoCC and under what conditions
 
-In @RQ1Findings, we observed that there was not necessarily a clear correlation between LoCC and $#sym.Delta"CD"$, which tells us that the two metrics measure different things and have their own purpose.
+In @RQ1Findings, observations showed that there was no clear correlation between LoCC and $#sym.Delta"CD"$, which indicates that the two metrics measure different things and have their own purpose.
 
 == Interpretation of RQ2 Findings
 // Explain how $#sym.Delta"CD"$ varies across commit types (Test, Fix, Feat, etc.)
 // Reflect on CD's ability to discriminate intent compared to LoCC
 
-In @RQ2Findings, we observed that certain types of commits contribute more information to the codebase than others. This is intuitive, as introducing a novel feature typically adds more unique content than modifying existing code for bug fixes or version bumps.
+In @RQ2Findings, observations showed that certain types of commits contribute more information to the codebase than others. This is intuitive, as introducing a novel feature typically adds more unique content than modifying existing code for bug fixes or version bumps.
 
 == Interpretation of RQ3 Findings
 // Analyze the author-level CD vs. LoCC aggregates
@@ -483,7 +469,7 @@ There are several hypothesis for the differences observed in @RQ3Findings. Since
 
 This demonstrates the built in survivorship bias that the metric includes and illustrate how you need to be aware of this when using the metric for judging work. For judging work done in group projects, one should select time ranges that correspond to the period of work during the project.
 
-We see that if we measure the author distribution based on cumulative $#sym.Delta"CD"$ contributions, we get survivorship bias built into the metric, which tells us more about who contributed the most to get the system in its current state.
+If the author distribution is measured based on cumulative $#sym.Delta"CD"$ contributions, survivorship bias is built into the metric, which tells more about who contributed the most to get the system in its current state.
 
 == Practical Implications
 // Implications for software teams: tool adoption, commit practices, metric dashboards
@@ -506,7 +492,7 @@ There are however some limitations to this approach, that makes it less desirabl
 
 === Performance:
 
-We've found that, at least with the current implementation, compressed distance is much slower to compute than traditional metrics like LoCC built in to Git Truck. For example, analyzing the entire history of Commitizen in Git Truck was measured to take $1.55#sym.plus.minus 0.07$ seconds, while it takes $374.28#sym.plus.minus 5.41$ seconds for the proposed tool in its current state, making it a $#sym.approx 250$ times slower metric in this scenario.
+With its current implementation, compressed distance is much slower to compute than traditional metrics like LoCC built in to Git Truck. For example, analyzing the entire history of Commitizen in Git Truck was measured to take $1.55#sym.plus.minus 0.07$ seconds, while it takes $374.28#sym.plus.minus 5.41$ seconds for the proposed tool in its current state, making it a $#sym.approx 250$ times slower metric in this scenario.
 
 === Scalability
 
@@ -570,7 +556,7 @@ Attempting to design an algorithmic formula for avoiding the survivorship bias i
 
 The git analysis pipeline powering Git Truck was used as a foundation for developing the analysis tool.
 
-We would like to thank Christian Gram Kalhauge \<chrg\@dtu.dk\> for proposing the idea for this project and for his valuable external supervision and guidance.
+I would like to thank Christian Gram Kalhauge \<chrg\@dtu.dk\> for proposing the idea for this project and for his valuable external supervision and guidance.
 \
 \
 \
