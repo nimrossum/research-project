@@ -5,10 +5,6 @@
 #show: codly-init.with()
 
 #codly(
-  languages: (
-    rust: (name: "Rust", color: rgb("#CE412B")),
-    sh: (name: "Terminal", color: rgb("#000000")),
-  ),
   number-format: none,
   display-name: false,
 )
@@ -96,6 +92,7 @@ Firstly, the term itself is ambiguous and subjective to the formatting of the co
 
 See the following ambiguous examples in @ambiguousListings. A few questions arise: should these snippets be counted as three separate lines of code or collapsed into a single line? In terms of actual work, a developer who writes either version is equally productive, yet if we simply count physical lines changed, the author of the first listing would be credited with three times the contribution of the second. This discrepancy shows how formatting alone can skew LoCC-based distance measures, as trivial style differences inflate the perceived distance between revisions and undermine the metric's reliability.
 
+
 #figure(
   caption: [Three semantically equivalent code snippets with different physical line counts],
   grid(
@@ -126,7 +123,7 @@ See the following ambiguous examples in @ambiguousListings. A few questions aris
 
 The LoCC metric can be distorted also by file renames, which may artificially inflate contribution counts, since renaming a file requires little effort but appears as significant line changes. Git supports rename detection using a similarity threshold#footnote[https://git-scm.com/docs/git-log#Documentation/git-log.txt-code-Mltngtcode], comparing deleted and added files to identify likely renames, utilized by tools such as Git Truck. While Git doesn't exclude renames by default, this tracking can be used to filter them out manually. However, rename detection is inherently ambiguous — at what point should we stop treating a change as a rename and instead count it as having deleted the old file and added a new one?#footnote[https://en.wikipedia.org/wiki/Ship_of_Theseus]
 
-The issue is further exacerbated when developers squash commits, potentially losing rename information. Ultimately, it's a trade-off between inflating the impact of trivial trivial renames and missing substantial, legitimate contributions.
+The issue is further exacerbated when developers squash commits, potentially losing rename information. Ultimately, it's a trade-off between inflating the impact of trivial renames and missing substantial, legitimate contributions.
 
 ==== Third problem: Automation-driven LoCC spikes <automationDrivenSpikes>
 
@@ -142,10 +139,9 @@ If the developers practice good Git hygiene (such as keeping commits small and f
 
 This shows why this metric cannot stand alone as a measure of productivity. This may cause the results to be misinterpreted, overstating the activity levels of certain developers or areas of the system.
 
-==== Fourth problem: Time bias <timeBias>
+==== Fourth problem: Survivorship bias <timeBias>
 
-
-Tools like Git Truck track the LoCC through the entire history of a project by default, weighing ancient changes as much as recent changes. In the development of Git Truck, this was attempted to be mitigated by looking at blame information#footnote[https://github.com/git-truck/git-truck/commit/12582272b5854d6bf23706b292f3519750023fdd] instead and only considering how the files that are still present in the system as of today has changed through time. However, this technique is still prone to the errors introduced by the problem stated in @renamePitfalls. Another attempt to solve this was the introduction of the time range slider#footnote[https://github.com/git-truck/git-truck/pull/731], which led the user select a duration of time to analyze and ignore past changes in analysis.
+Another problem with the LoCC metric is that it is _not_ time biased. This means that if a developer made a lot of changes to a file in the past, but then later removed all of them, they would still be credited for all of those changes, even though they are not present in the current version of the file. This is a problem when trying to analyze the history of a project and understand how it has evolved over time. Tools like Git Truck track LoCC through the entire history of a project by default, weighing ancient changes as much as recent changes. In the development of Git Truck, this was attempted to be mitigated by looking at blame information#footnote[https://github.com/git-truck/git-truck/commit/12582272b5854d6bf23706b292f3519750023fdd] instead and only considering how the files that are still present in the system as of today has changed through time. However, this technique is still prone to the errors introduced by the problem stated in @renamePitfalls. Another attempt to solve this was the introduction of the time range slider#footnote[https://github.com/git-truck/git-truck/pull/731], which led the user select a duration of time to analyze and ignore past changes in analysis.
 
 
 = Approach <sec:approach>
@@ -160,9 +156,9 @@ However, this means we can no longer rely on line-based diffing algorithms, akin
 
 We can mitigate the problem with ambiguity and renames by concatenating all the files existing in each commit into a single file buffer. We will refer to this as the concatenated commit buffer, $"CCB"$. We can measure its size before and after the commit to calculate a *byte distance metric*, see @byte-distance-metric.
 
-$#sym.Delta"D" = |x| - |x-1|$ <byte-distance-metric>
+$ #sym.Delta"D"(x) = |x| - |x-1| $ <byte-distance-metric>
 
-where $#sym.Delta"D"$ is the distance in bytes, $|x|$ is the size of the given commit buffer and $x-1$ is the size of the previous commit buffer.
+where $#sym.Delta"D"(x)$ is the distance in bytes, $|x|$ is the size of the given commit buffer and $x-1$ is the size of the previous commit buffer.
 
 This method does not address the problem with automatic actions overstating developer impact.
 
@@ -177,13 +173,15 @@ Instead of measuring the static distance in bytes before and after the commit, w
 
 We define the Compression Distance $"CD"$ metric as a measure of how much a given concatenated commit buffer compresses with the baseline commit buffer:
 
-$ "CD"(x, y) = |Z(x)| - |Z(x #sym.union y)| $ <def:compression_distance>
+$ "CD"(x, y) = |C(x)| - |C(x #sym.union y)| $ <def:compression_distance>
+
+
 
 where $"CD"$ is the compression distance, $x$ is the given concatenated commit buffer and $"Z"$ is a lossless compression algorithm.
 
 Now we can define the impact of the commit $#sym.Delta"CD"$, compared to the previous commit buffer, giving us
 
-$ #sym.Delta "CD" = "CD"(x) - "CD"(x-1) $ <def:compression_distance_delta>
+$ #sym.Delta"CD" = "CD"(x) - "CD"(x-1) $ <def:compression_distance_delta>
 
 Unlike the normalized compression distance, this metric is not bounded and is dependent on the absolute sizes of the compressed files. This is fine in this scenario, as we want to compare commits in the same project and the magnitude of the compression distance tells us an interesting story about the impact of the commit.
 
@@ -191,7 +189,7 @@ Then, we can compute the change in the size in bytes before and after the commit
 
 // Describe the method, how we compare the distance to the newest version
 
-If we attempt to compress the commit buffers in presence of the newest commit buffer of the repository, we get the side effect of introducing survivorship bias into the system. By measuring the compressed distance to the newest commit buffer of the project, we value changes that are more akin to the newest version higher, in order to tell a story about how we got to the newest version and which commits were the most influential in getting there. This might not be what you want, but for some purposes this makes a lot of sense, as long as you keep the survivorship bias in mind. For example, a detour in the project that didn't make it in the newest version is weighted by a negative distance, telling us this brought the project further away from the newest version, but it might still have been a valuable journey to take with the project. See @deltaCDZeeguu for a diagram showing how some commits increase the distance from the final version.
+If we attempt to compress the commit buffers in presence of the newest commit buffer of the repository, we get the side effect of introducing survivorship bias into the system. By measuring the compressed distance to the newest commit buffer of the project, we value changes that are more akin to the newest version higher, in order to tell a story about how we got to the newest version and which commits were the most influential in getting there. For some purposes this makes sense, as long as you are aware of  survivorship bias. For example, a detour in the project that didn't make it in the newest version is weighted by a negative distance, telling us this brought the project further away from the newest version, but it might still have been a valuable journey to take with the project. See @deltaCDZeeguu for a diagram showing how some commits increase the distance from the final version.
 
 #figure(
   caption: [Waterfall diagram showing ∆CD for the latest 100 commits in the repository #link("https://github.com/zeeguu/api", "github.com/zeeguu/api")],
@@ -210,7 +208,7 @@ Normalized Compression Distance (NCD) @Normaliz98:online is a effective way of m
 
 According to @cebrian2005common, NCD is an effective distance measurement, as long as it is used properly, which can be achieved if you understand how compression algorithms work. Most compression algorithms use a sliding window of context from which to compare new data to old data, in order to limit memory consumption. If the size of this window is too small, matches might not be found and the data might not compress as well. Since we are using the compression to quantify the similarity, it is crucial that we use a compression algorithm with support for a window size that exceeds the size of the data that we want to compare. In fact, if we compare two version of an object to determine how it has changed over time, we need a window size twice the size of the largest version of the object, in order to not overlook shared patterns.
 
-However, nobody has used normalized compression ratio as a distance metric in version control system analysis yet. The hypothesis of this work is that NCD-derived metrics could function as a complement to the more well-known LC and NoC metrics mentioned above, and be resilient to renaming.
+However, nobody has used NCD based distance metrics in version control system analysis yet. The hypothesis of this project is that NCD-derived metrics could function as a complement to the more well-known LoCC metric, and be resilient to the problems that LoCC suffers from.
 
 = Methodology <sec:methodology>
 
@@ -527,20 +525,18 @@ The built in survivorship bias is included with this metric for better or for wo
 
 This paper has presented out a method for using compression as a metric for information distance, defined as
 
-$ "CD"(x,y) = |Z(x)| - |Z(x #sym.union y)| $
+$ "CD"(x,y) = |C(x)| - |C(x #sym.union y)| $
 
-where $Z$ is a compression function, $x$ is the CBB and $y$ is the baseline $"CBB"$.
+where $C$ is a compression function, $x$ is the concatenated commit buffer and $y$ is the baseline concatenated commit buffer.
 
 
 The results suggest that CD provides a more nuanced and robust measure of software evolution, paving the way for its adoption in both academic research and industry practice. The results also show that you need to be aware of built in biases in the metric.
 
 == Future Work
-// Explore normalized variants (NCD) and theoretical bounds
-// Scale to larger repositories and distributed systems
-// Integrate CD into CI/CD pipelines and developer dashboards
-// Study CD's applicability to non-code artifacts (configs, docs)
 
-=== Useability
+There are many directions to take this project further, including exploring usability, scalability, performance and bias elimination.
+
+=== Usability
 
 Incorporating the tool into Git Truck would make it so others could experiment with the data as well. It would also be interesting to see how this data could be incorporated and presented into the visualizations of Git Truck. It could work as an extension of the author distribution already found in Git Truck, that is currently based on LoCC.
 
@@ -564,7 +560,7 @@ This shows that future work could be done to investigate whether this metric cou
 
 === Performance
 
-Future work could be done to investigate methods of speeding up the computational process. The process might be parallelizeable and could utilize using shared memory with dynamic garbage collection, to reduce the memory overhead of the analysis. The current approach caches file buffers, but leaves garbage collection to the runtime.
+Future work could be done to investigate methods of speeding up the computational process. The process might be parallelizable and could utilize using shared memory with dynamic garbage collection, to reduce the memory overhead of the analysis. The current approach caches file buffers, but leaves garbage collection to the runtime.
 
 === Bias elimination
 
