@@ -15,14 +15,20 @@
   author: "Jonas Nim Røssum <jglr@itu.dk>",
   date: datetime(year: 2025, month: 05, day: 15),
   abstract: [
-    #text(weight: "bold")[Supervisor:] Mircea Lungu \<mlun\@itu.dk\>
-    *TODO*: Abstract
+    #text(weight: "bold")[Supervisor:]
+    Mircea Lungu \<mlun\@itu.dk\>
     // - One line of context & the gap (why LoCC isn't enough).
     // - One line of “what we did” (introduced CD).
     // - One line of your key quantitative result (e.g. correlation coefficients, discrimination power).
     //   - Add clear, concise statement of your key quantitative results (e.g. “We found that CD correlates at ρ = 0.72 with expert judgements, versus LoCC's ρ = 0.45”).
     // - One line of the take-home (“CD can serve as a complementary metric…“).
     //   - No final “conclusion” sentence (“CD can serve as a complementary or alternative metric to LoCC in X contexts”).
+    \
+    \
+    #text[
+      Lines of code changed (LoCC) is one of the most widely used distance metrics in the software industry, but it suffers from several key drawbacks that can mislead when analyzing developer effort and project activity. In this paper, we have explored the shortcomings of LoCC and propose an alternative metric: Compression Distance, $"CD"(x,y) = |C(x)| - |C(x #sym.union y)|$ derived from Normalized Compression Distance (NCD) and lossless compression algorithms with large search windows. The CD metric has been presented as a complementary metric for information distance to traditional methods like LoCC.
+      The results suggest that CD provides a more nuanced and robust measure of software evolution, to be used as a complementary metric to proven metrics like LoCC, while being aware of the biases in the metric.
+    ]
   ],
   preface: [
     #align(center + horizon)[
@@ -189,7 +195,7 @@ Then, we can compute the change in the size in bytes before and after the commit
 
 // Describe the method, how we compare the distance to the newest version
 
-If we attempt to compress the commit buffers in presence of the newest commit buffer of the repository, we get the side effect of introducing survivorship bias into the system. By measuring the compressed distance to the newest commit buffer of the project, we value changes that are more akin to the newest version higher, in order to tell a story about how we got to the newest version and which commits were the most influential in getting there. For some purposes this makes sense, as long as you are aware of  survivorship bias. For example, a detour in the project that didn't make it in the newest version is weighted by a negative distance, telling us this brought the project further away from the newest version, but it might still have been a valuable journey to take with the project. See @deltaCDZeeguu for a diagram showing how some commits increase the distance from the final version.
+If we attempt to compress the commit buffers in presence of the newest commit buffer of the repository, we get the side effect of introducing survivorship bias into the system. By measuring the compressed distance to the newest commit buffer of the project, we value changes that are more akin to the newest version higher, in order to tell a story about how we got to the newest version and which commits were the most influential in getting there. For some purposes this makes sense, as long as you are aware of survivorship bias. For example, a detour in the project that didn't make it in the newest version is weighted by a negative distance, telling us this brought the project further away from the newest version, but it might still have been a valuable journey to take with the project. See @deltaCDZeeguu for a diagram showing how some commits increase the distance from the final version.
 
 #figure(
   caption: [Waterfall diagram showing ∆CD for the latest 100 commits in the repository #link("https://github.com/zeeguu/api", "github.com/zeeguu/api")],
@@ -523,7 +529,7 @@ The built in survivorship bias is included with this metric for better or for wo
 // Recap: implementation in Git Truck API and empirical evaluation
 // Recap: CD's advantages over LoCC demonstrated via RQ1-RQ3
 
-This paper has presented out a method for using compression as a metric for information distance, defined as
+This paper has presented a method for using compression as a metric for information distance, defined as
 
 $ "CD"(x,y) = |C(x)| - |C(x #sym.union y)| $
 
