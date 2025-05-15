@@ -173,7 +173,7 @@ Instead of measuring the static distance in bytes before and after the commit, w
 
 == Definition of Compression Distance
 
-We define the Compression Distance $"CD"$ metric as a measure of how much a given concatenated commit buffer compresses with the baseline commit buffer:
+We define the Compression Distance $"CD"$ metric as a measure of how much a given concatenated commit buffer compresses with the baseline commit buffer, see @def:compression_distance.
 
 $ "CD"(x, y) = |C(x #sym.union y)| - |C(x)| $ <def:compression_distance>
 
@@ -181,7 +181,7 @@ $ "CD"(x, y) = |C(x #sym.union y)| - |C(x)| $ <def:compression_distance>
 
 where $"CD"$ is the compression distance, $x$ is the given concatenated commit buffer and $"Z"$ is a lossless compression algorithm.
 
-Now we can define the impact of the commit $#sym.Delta"CD"$, compared to the previous commit buffer, giving us
+Now we can define the impact of the commit $#sym.Delta"CD"$, compared to the previous commit buffer, see @def:compression_distance_delta.
 
 $ #sym.Delta"CD" = "CD"(x) - "CD"(x-1) $ <def:compression_distance_delta>
 
@@ -294,7 +294,7 @@ A concatenated commit buffer (CCB) was constructed for every commit, reading all
 === Compression Setup <compressionSetup>
 // zstd version, compression level (3), window size 2^21 B, memory limits.
 
-Each CCB was compressed using ZStandard (zstd) @zstdlibc51:online. The ZStandard compression algorithm (zstd) @facebook31:online, has a window log of 21 @zstdlibc51:online for its default 3 level compression, making the window size $2^21 = 2"MB"$. This makes zstd suitable for this task, as long as you are aware of the limit and remember to adjust it as needed. As mentioned in @repositorySelection, it was ensured that the repositories used were smaller than half of this size#footnote("Due to compressing the newest commit buffer with each commit, meaning that a window size of at least 2x the baseline buffer was needed, assuming that no commit buffer is larger than the final buffer"), to ensure that the sliding search window of the compression algorithm was able to take the entire commit buffer into account
+Each CCB was compressed using ZStandard (zstd) @zstdlibc51:online. The ZStandard compression algorithm (zstd) @facebook31:online, has a window log of 21 @zstdlibc51:online for its default 3 level compression, making the window size $2^21 = 2"MB"$. This makes zstd suitable for this task, as long as you are aware of the limit and remember to adjust it as needed. As mentioned in @repositorySelection, it was ensured that the repositories used were smaller than half of this size#footnote("Due to compressing the newest commit buffer with each commit, meaning that a window size of at least 2x the baseline buffer was needed, assuming that no commit buffer is larger than the final buffer"), to ensure that the sliding search window of the compression algorithm was able to take the entire commit buffer into account.
 
 === Calculating $"CD"$ & $#sym.Delta"CD"$
 
@@ -364,12 +364,13 @@ The byte distance, LoCC and $#sym.Delta"CD"$ is accumulated for each developer t
 
 We then aggregate each metric for each contributor throughout the history of the repository.
 
-For context, Git Truck was initially developed by a group of four developers. Later, the project was continuously contributed to several developers, and even later Thomas contributed to the project during his their master thesis.
+For context, Git Truck was initially developed by a group of four developers. Later, the project was continuously contributed to several developers, and even later Thomas contributed to the project during his master thesis.
 
 We will compare the project before and after the master thesis by Thomas.
 
 === Author-Level Aggregates
 
+To assess how CD shifts our view of who “moves the most code” compared to traditional LoCC, we compute cumulative ΔCD and cumulative LoCC per author at two key snapshots: before Thomas' master’s-thesis work (v1.13.0) and afterwards (v2.0.4). See @beforeAndAfterTThesis for a diagram visualizing the differences.
 
 #figure(
   caption: [Cumulative LoCC and $#sym.Delta"CD"$ \ Left: Before master thesis (v1.13.0), Right: after (v2.0.4)],
@@ -407,31 +408,40 @@ We will compare the project before and after the master thesis by Thomas.
   ),
 ) <beforeAndAfterTThesisTable>
 
-See @beforeAndAfterTThesis for the distribution over cumulative byte distance, LoCC and $#sym.Delta"CD"$ over the two time periods. See @beforeAndAfterTThesisTimeSeries for how the cumulative distribution has changes over time.
+See @beforeAndAfterTThesis for the distribution over cumulative byte distance, LoCC and $#sym.Delta"CD"$ over the two time periods. The top charts show the author distribution before  the thesis project by Thomas and the bottom charts show the author distribution after.
 
+
+
+See @beforeAndAfterTThesisTimeSeries for how the cumulative distribution has changes over time.
 
 
 #figure(
-  caption: [Pie charts of the cumulative author distribution before (top) and after (bottom) the thesis project by Thomas. \ Left: Cumulative Byte Distance, Center: Cumulative $#sym.Delta"CD"$, Right: Cumulative LoCC],
+  caption: [Bar charts of the cumulative author distribution before (top) and after (bottom) the thesis project by Thomas],
   grid(
     columns: 1,
     gutter: 1cm,
-    image("assets/before_thesis.png"),
-    image("assets/after_thesis.png"),
+    image("assets/Cumulative Compressed distance count vs. Compress distance, before thesis.svg"),
+    image("assets/Cumulative Compressed distance count vs. Compress distance, after thesis.svg"),
   ),
 ) <beforeAndAfterTThesis>
 
 #figure(
   caption: [
-    Cumulative area charts of the author distribution over time. \
+    Cumulative author distribution over time to Git Truck. \
     Overlap (top), stacked (middle) stacked 100% (bottom) \
-    $#sym.Delta"CD"$ based (left) and LoCC based (right)
+    $#sym.Delta"CD"$ (left) and LoCC (right).
   ],
   grid(
     columns: 2,
-    rows: 3,
-    gutter: 1cm,
-    image("assets/CDD no stack.svg"), image("assets/LoCC no stack.svg"),
+    rows: 4,
+    gutter: 0.1cm,
+    [Cumulative ΔCD (bytes)\ contributed to  Git Truck],
+    grid.vline(
+      
+    ),
+    [Cumulative LoCC (lines)\ contributed to Git Truck],
+    image("assets/CDD no stack.svg"),
+    image("assets/LoCC no stack.svg"),
     image("assets/CDD stack.svg"), image("assets/LoCC stack.svg"),
     image("assets/CDD stack100.svg"), image("assets/LoCC stack100.svg"),
   ),
@@ -486,7 +496,7 @@ While measuring automatic velocity is a good idea, it is not the only thing to c
 
 There are however some limitations to this approach, that makes it less desirable compared to alternatives, depending on the needs.
 
-=== Performance:
+=== Performance
 
 With its current implementation, compressed distance is much slower to compute than traditional metrics like LoCC built in to Git Truck. For example, analyzing the entire history of Commitizen in Git Truck was measured to take $1.55#sym.plus.minus 0.07$ seconds, while it takes $374.28#sym.plus.minus 5.41$ seconds for the proposed tool in its current state, making it a $#sym.approx 250$ times slower metric in this scenario.
 
@@ -498,18 +508,13 @@ For very large repositories, it becomes unfeasible to calculate the compression 
 
 The built in survivorship bias is included with this metric for better or for worse. Alternative algorithms were tested during the project, but did not show promise and were abandoned early on.
 
-= Conclusion & Future Work
+= Conclusion
 
+In this project, we set out to quantify software evolution via a novel compression Distance (CD) metric, complementing the existing LoCC measure. Below we recap our key contributions before outlining directions for future research.
+ 
 == Summary of Key Contributions
-// Recap: definition of Compression Distance (CD) metric
-// Recap: implementation in Git Truck API and empirical evaluation
-// Recap: CD's advantages over LoCC demonstrated via RQ1-RQ3
 
-This paper has presented a method for using compression as a metric for information distance as a complementary metric to LoCC, defined as:
-
-$ "CD"(x,y) = |C(x #sym.union y)| - |C(x)| $
-
-where $C$ is a lossless compression function, $x$ is the concatenated commit buffer and $y$ is the baseline concatenated commit buffer. CD computation was implemented as API endpoints in the Git Truck analysis tool, leveraging ZStandard with a 2 MB search window by default. We empirically evaluated CD on two projects (Git Truck and Commitizen), answering RQ1-RQ3 and demonstrating CD's advantages in quantifying complexity and discriminating commit types. The results suggest that CD provides a more nuanced and robust measure of software evolution. We discussed the practical biases and limitations of CD, offering guidelines for its adoption in research and industry.
+We defined the Compression Distance (CD) metric as an information-distance complement to LoCC (@def:compression_distance). We implemented CD computation in the Git Truck API using ZStandard with a 2 MB search window. Empirical evaluation on Git Truck and Commitizen (RQ1-RQ3) showed that CD more finely quantifies code complexity and distinguishes commit types. Finally, we discussed CD’s biases and provided adoption guidelines. 
 
 == Future Work
 
@@ -519,7 +524,7 @@ There are many directions to take this project further, including exploring usab
 
 Incorporating the tool into Git Truck would make it so others could experiment with the data as well. It would also be interesting to see how this data could be incorporated and presented into the visualizations of Git Truck. It could work as an extension of the author distribution already found in Git Truck, that is currently based on LoCC.
 
-=== Scalability
+== Scalability
 
 Attempting to run the tool on a large repository, like the source code for Linux @torvalds69:online yields a maxBuffer exceeded error:
 
@@ -537,15 +542,15 @@ RangeError: stdout maxBuffer length exceeded
 
 This shows that future work could be done to investigate whether this metric could scale to very large repositories.
 
-=== Performance
+== Performance
 
 Future work could be done to investigate methods of speeding up the computational process. The process might be parallelizable and could utilize using shared memory with dynamic garbage collection, to reduce the memory overhead of the analysis. The current approach caches file buffers, but leaves garbage collection to the runtime.
 
-=== Bias elimination
+== Bias elimination
 
 Attempting to design an algorithmic formula for avoiding the survivorship bias included in the metric might be an interesting project to undertake, if the bias is deemed undesirable to the use case.
 
-= Acknowledgments
+== Acknowledgments
 
 The git analysis pipeline powering Git Truck was used as a foundation for developing the analysis tool.
 
