@@ -82,9 +82,9 @@ In the field of information theory, the concept of _information distance_ is use
 
 While such a function $F$ only exists in theory, we can still approximate the information distance between two objects using various practical techniques such as diffing and compression algorithms, as we will explore in this paper.
 
-=== Lines of Code Changed as a measure of information distance
+=== LoCC as a measure of information distance
 
-Since many projects utilize version control systems, such as Git @Git46:online, for keeping track of changes, we can track the _Lines of code changed_ (LoCC) over time using diffing algorithms. The LoCC metric is typically defined as the number of lines added and removed in a commit. This provides a measure of the information distance between revisions of a software system. Git includes this functionality by default using the numstat argument. @Gitgitlo53:online. This is a commonly used technique used to detect activity in software systems over time @goeminne2013analyzing. It can be used to assess team velocity, developer productivity and more. These metrics can be automatically obtained via version control systems using tools like Git Truck@hojelse2022git. LoCC is a useful metric for quantifying contributions or regions of interest in software systems over time and tools like Git Truck have shown the effectiveness of LoCC in the analysis of software evolution @lungu2022can, @neyem2025exploring.
+Since many projects utilize version control systems, such as Git @Git46:online, for keeping track of changes, we can track LoCC over time using diffing algorithms. The LoCC metric is typically defined as the number of lines added and removed in a commit. This provides a measure of the information distance between revisions of a software system. Git includes this functionality by default using the numstat argument. @Gitgitlo53:online. This is a commonly used technique used to detect activity in software systems over time @goeminne2013analyzing. It can be used to assess team velocity, developer productivity and more. These metrics can be automatically obtained via version control systems using tools like Git Truck@hojelse2022git. LoCC is a useful metric for quantifying contributions or regions of interest in software systems over time and tools like Git Truck have shown the effectiveness of LoCC in the analysis of software evolution @lungu2022can, @neyem2025exploring.
 
 === Shortcomings of LoCC
 
@@ -445,15 +445,15 @@ See @beforeAndAfterTThesis for the distribution over cumulative byte distance, L
   caption: [
     Cumulative area charts of the author distribution over time. \
     Overlap (top), stacked (middle) stacked 100% (bottom) \
-    $#sym.Delta"CD"$ based (left) and LoC based (right)
+    $#sym.Delta"CD"$ based (left) and LoCC based (right)
   ],
   grid(
     columns: 2,
     rows: 3,
     gutter: 1cm,
-    image("assets/CDD no stack.svg"), image("assets/LoC no stack.svg"),
-    image("assets/CDD stack.svg"), image("assets/LoC stack.svg"),
-    image("assets/CDD stack100.svg"), image("assets/LoC stack100.svg"),
+    image("assets/CDD no stack.svg"), image("assets/LoCC no stack.svg"),
+    image("assets/CDD stack.svg"), image("assets/LoCC stack.svg"),
+    image("assets/CDD stack100.svg"), image("assets/LoCC stack100.svg"),
   ),
 ) <beforeAndAfterTThesisTimeSeris>
 
