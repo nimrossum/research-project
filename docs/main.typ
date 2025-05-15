@@ -24,7 +24,7 @@
     // - One line of context & the gap (why LoCC isn't enough).
     // - One line of “what we did” (introduced CD).
     // - One line of your key quantitative result (e.g. correlation coefficients, discrimination power).
-    //   - Add clear, concise statement of your key quantitative results (e.g. “We found that CD correlates at ρ = 0.72 with expert judgements, versus LoCC’s ρ = 0.45”).
+    //   - Add clear, concise statement of your key quantitative results (e.g. “We found that CD correlates at ρ = 0.72 with expert judgements, versus LoCC's ρ = 0.45”).
     // - One line of the take-home (“CD can serve as a complementary metric…“).
     //   - No final “conclusion” sentence (“CD can serve as a complementary or alternative metric to LoCC in X contexts”).
   ],
@@ -94,7 +94,7 @@ There are however multiple problems when relying on LoCC as a sole metric of pro
 
 Firstly, the term itself is ambiguous and subjective to the formatting of the code. One could say that line breaks are just an arbitrary formatting character. In reality, the program could have been written in a single line of code.
 
-See the following ambiguous examples in @ambiguousListings. A few questions arise: should these snippets be counted as three separate lines of code or collapsed into a single line? In terms of actual work, a developer who writes either version is equally productive, yet if we simply count physical lines changed, the author of the first listing would be credited with three times the contribution of the second. This discrepancy shows how formatting alone can skew LoCC-based distance measures, as trivial style differences inflate the perceived distance between revisions and undermine the metric’s reliability.
+See the following ambiguous examples in @ambiguousListings. A few questions arise: should these snippets be counted as three separate lines of code or collapsed into a single line? In terms of actual work, a developer who writes either version is equally productive, yet if we simply count physical lines changed, the author of the first listing would be credited with three times the contribution of the second. This discrepancy shows how formatting alone can skew LoCC-based distance measures, as trivial style differences inflate the perceived distance between revisions and undermine the metric's reliability.
 
 #figure(
   caption: [Three semantically equivalent code snippets with different physical line counts],
@@ -118,15 +118,15 @@ See the following ambiguous examples in @ambiguousListings. A few questions aris
 
 
 
-    ```
+    ```,
   ),
 ) <ambiguousListings>
 
 ==== Second problem: Rename-detection pitfalls <renamePitfalls>
 
-The LoCC metric can be distorted also by file renames, which may artificially inflate contribution counts, since renaming a file requires little effort but appears as significant line changes. Git supports rename detection using a similarity threshold#footnote[https://git-scm.com/docs/git-log#Documentation/git-log.txt-code-Mltngtcode], comparing deleted and added files to identify likely renames, utilized by tools such as Git Truck. While Git doesn’t exclude renames by default, this tracking can be used to filter them out manually. However, rename detection is inherently ambiguous — at what point should we stop treating a change as a rename and instead count it as having deleted the old file and added a new one?#footnote[https://en.wikipedia.org/wiki/Ship_of_Theseus]
+The LoCC metric can be distorted also by file renames, which may artificially inflate contribution counts, since renaming a file requires little effort but appears as significant line changes. Git supports rename detection using a similarity threshold#footnote[https://git-scm.com/docs/git-log#Documentation/git-log.txt-code-Mltngtcode], comparing deleted and added files to identify likely renames, utilized by tools such as Git Truck. While Git doesn't exclude renames by default, this tracking can be used to filter them out manually. However, rename detection is inherently ambiguous — at what point should we stop treating a change as a rename and instead count it as having deleted the old file and added a new one?#footnote[https://en.wikipedia.org/wiki/Ship_of_Theseus]
 
-The issue is further exacerbated when developers squash commits, potentially losing rename information. Ultimately, it’s a trade-off between overcounting trivial renames and missing substantial, legitimate contributions. 
+The issue is further exacerbated when developers squash commits, potentially losing rename information. Ultimately, it's a trade-off between inflating the impact of trivial trivial renames and missing substantial, legitimate contributions.
 
 ==== Third problem: Automation-driven LoCC spikes <automationDrivenSpikes>
 
@@ -194,8 +194,8 @@ Then, we can compute the change in the size in bytes before and after the commit
 If we attempt to compress the commit buffers in presence of the newest commit buffer of the repository, we get the side effect of introducing survivorship bias into the system. By measuring the compressed distance to the newest commit buffer of the project, we value changes that are more akin to the newest version higher, in order to tell a story about how we got to the newest version and which commits were the most influential in getting there. This might not be what you want, but for some purposes this makes a lot of sense, as long as you keep the survivorship bias in mind. For example, a detour in the project that didn't make it in the newest version is weighted by a negative distance, telling us this brought the project further away from the newest version, but it might still have been a valuable journey to take with the project. See @deltaCDZeeguu for a diagram showing how some commits increase the distance from the final version.
 
 #figure(
-  caption: [Waterfall diagram showing ∆CD for the latest 100 commits in the repository #link("https://github.com/zeeguu/api","github.com/zeeguu/api")],
-  image("assets/∆CD for github.com_zeeguu_api.svg")
+  caption: [Waterfall diagram showing ∆CD for the latest 100 commits in the repository #link("https://github.com/zeeguu/api", "github.com/zeeguu/api")],
+  image("assets/∆CD for github.com_zeeguu_api.svg"),
 ) <deltaCDZeeguu>
 
 == Mitigating survivorship bias in compression distance
@@ -216,7 +216,7 @@ However, nobody has used normalized compression ratio as a distance metric in ve
 
 == Data collection
 
-During this project, the analysis tools were implemented as API endpoints exposed in the Git Truck project @gittruck76:online. This was done due to the foundation for performing git analysis were already readily available in Git Truck project, which sped up the development of the tools. 
+During this project, the analysis tools were implemented as API endpoints exposed in the Git Truck project @gittruck76:online. This was done due to the foundation for performing git analysis were already readily available in Git Truck project, which sped up the development of the tools.
 
 We used these endpoints to collect and visualize data about different repositories to draw conclusions about the Compression Distance metric.
 
@@ -224,9 +224,9 @@ We used these endpoints to collect and visualize data about different repositori
 
 For the analysis of this project, two differently sized projects were chosen. Git Truck was chosen, as we were familiar with its history and knew that an attempt was made to conform to good practices of making git commits, such as using the imperative mood etc., which made categorizing the commits simpler. Commitizen was chosen as well, due to its nature of conforming to the use of Conventional Commits @Conventi81:online, which automatically could be categorized.
 
-The different versions of Git Truck where chosen due to the known time periods on which the project was worked on by a previously known set of contributors. 
+The different versions of Git Truck where chosen due to the known time periods on which the project was worked on by a previously known set of contributors.
 
-From @git-repositories, we see that all the chosen repositories lie below the maximum of 1MB, which ensures  that sliding search window of the compression algorithm is able to take the repositories in their entireties into account, as mentioned in @NCD.
+From @git-repositories, we see that all the chosen repositories lie below the maximum of 1MB, which ensures that sliding search window of the compression algorithm is able to take the repositories in their entireties into account, as mentioned in @NCD.
 
 
 #figure(
@@ -239,26 +239,18 @@ From @git-repositories, we see that all the chosen repositories lie below the ma
     table.cell(
       colspan: 2,
       align: center,
-      [*Newest commit*]
+      [*Newest commit*],
     ),
     [],
-
-    
-      [*Repository\@revision*],
-      [*Hash*],
-      [*Buffer size* \ ($"MB"$)],
-      [*Commits*],
-  
-    
+    [*Repository\@revision*],
+    [*Hash*],
+    [*Buffer size* \ ($"MB"$)],
+    [*Commits*],
     [Git Truck\@ncd @github-git-truck:online], "bf46e09", $0.365$, "1356", // 383292/((2^10)^2) = 0.365535736
     [Git Truck\@v2.0.4 @github-git-truck:online], "d385ace", $0.318$, "1260", //333644/((2^10)^2) = 0.318
     [Git Truck\@v1.13.0 @github-git-truck:online], "71ae30d", $0.259$, "1242", // 270329/((2^10)^2) = 0.259
-    // [Twooter\@main @github-twooter:online], "2a6a407", $0.133$, "234",
-    // 139376/((2^10)^2) = 0.133
-    [Commitizen\@master @github-commitizen:online], "e177141", $0.771$, "1977"
-    // 808691/((2^10)^2) = 0.771
-    // Zeeguu API | "master (???)", "???",
-  )
+    [Commitizen\@master @github-commitizen:online], "e177141", $0.771$, "1977" // 808691/((2^10)^2) = 0.771
+  ),
 ) <git-repositories>
 
 === File Inclusion/Exclusion
@@ -272,15 +264,15 @@ If any extensions were found that were neither included nor excluded, an automat
 
 === API Data retrieval
 
-The tool is able to go through a specified range of the history of a git repository and compute metrics for each commit. 
+The tool is able to go through a specified range of the history of a git repository and compute metrics for each commit.
 
 The current version of the tool is as of writing not published yet and has to be run manually by cloning the source code.
 
-Queries can be performed using query parameters like so: 
+Queries can be performed using query parameters like so:
 Among other metrics, the endpoint is able to compute the Compression Distance in relation to the baseline commit, the newest commit at the given revision in the repository.
 
 - Repository can be specified using the $"repo=<folder>"$ parameter#footnote[The repo parameter refers to a specific git repository folder located relative to where the tools was downloaded.]
-- Baseline branch or revision is specified with the $"branch=<revision>"$ parameter. 
+- Baseline branch or revision is specified with the $"branch=<revision>"$ parameter.
 - Amount of commits to analyze is specified using the $"count"=N|"Infinity"$ parameter, going backwards from $"branch"$#footnote[Passing Infinity as count makes the tool go through all the commits in the given repository.]
 
 To generate the data for this project, the following queries were used:
@@ -294,7 +286,7 @@ To generate the data for this project, the following queries were used:
     [git-truck], [v2.0.4], [Infinity],
     [git-truck], [v1.13.0], [Infinity],
     [commitizen], [master], [Infinity],
-  )
+  ),
 )
 This produces a CSV output that can be processed in a data processing tool. During this project, Google Sheets was used for this purpose. Useful information and progress updates is reported in the console.
 
@@ -309,7 +301,7 @@ We begin by constructing a concatenated commit buffer (CCB) for every commit, re
 === Compression Setup
 // zstd version, compression level (3), window size 2^21 B, memory limits.
 
-Next, we compress each CCB and its paired baseline buffer using ZStandard (zstd) @zstdlibc51:online. 
+Next, we compress each CCB and its paired baseline buffer using ZStandard (zstd) @zstdlibc51:online.
 
 The ZStandard compression algorithm (zstd) @facebook31:online, has a window log of 21 @zstdlibc51:online for its default 3 level compression, making the window size $2^21 = 2"MB"$. This makes zstd suitable for this task, as long as you are aware of the limit and remember to adjust it as needed.
 
@@ -333,7 +325,7 @@ For Commitizen, we used: Test, Fix, Feat, Refactor, Style, Docs, as
 For Git Truck, we used: Bump, Refactor, Fix, Feature.
 
 == Statistical Analysis
-// Methods: Spearman’s ρ, regression, boxplots; significance tests; tools/libraries used.
+// Methods: Spearman's ρ, regression, boxplots; significance tests; tools/libraries used.
 
 We evaluated whether per-commit $#sym.Delta"CD"$ aligns with traditional complexity measured by LoCC. For each repository, we created log-log scatter plots with linear trend-lines and computed the coefficient of determination, $R^2$, between $#sym.Delta"CD"$ and LoCC across all commits.
 
@@ -360,12 +352,12 @@ To answer RQ1, we will explore newest version of each repository and see how the
     columns: 4,
     align: (left, left, right, right),
     table.header([*Project*], [*Revision*], [*$R^2$, linear*], [*$R^2$, power*]),
-    [Git Truck],[ncd], $0.825$, $0.494$,
-    [Commitizen],[master], $0.297$, $0.506$
+    [Git Truck], [ncd], $0.825$, $0.494$,
+    [Commitizen], [master], $0.297$, $0.506$,
   ),
 ) <loccVsDeltaCompDist>
 
-From @loccVsDeltaCompDist, it seems that for Git Truck, there exists a linear correlation between LoCC and $#sym.Delta"CD"$, however for Commitizen, a power regression produces a better correlation. 
+From @loccVsDeltaCompDist, it seems that for Git Truck, there exists a linear correlation between LoCC and $#sym.Delta"CD"$, however for Commitizen, a power regression produces a better correlation.
 
 == RQ2: Discrimination Across Commit Types <RQ2Findings>
 
@@ -379,7 +371,7 @@ If we plot each category of commit as a series on a log-log scatter-plot, we can
   image("assets/commitizenCD∆ vs LoCC.svg"),
 ) <commitizenDeltaCompDistVSLoCC>
 
-From the plot, we can see that bug fix commits specifically has a tendency to have a lower $#sym.Delta"CD"$ metric. 
+From the plot, we can see that bug fix commits specifically has a tendency to have a lower $#sym.Delta"CD"$ metric.
 
 We can also see that version bumps vary much less in impact compared to the other categories.
 Feature commits generally have a larger LoCC than other commits, and might contain more novel code that compress less, compared to bug fixes.
@@ -394,7 +386,7 @@ We then aggregate each metric for each contributor throughout the history of the
 
 For context, Git Truck was initially developed by a group of four developers. Later, the project was continuously contributed to several developers, and even later Thomas contributed to the project during his their master thesis.
 
-We will compare the project before and after the master thesis by Thomas. 
+We will compare the project before and after the master thesis by Thomas.
 
 === Author-Level Aggregates
 
@@ -402,7 +394,8 @@ We will compare the project before and after the master thesis by Thomas.
 #figure(
   caption: [Cumulative LoCC and $#sym.Delta"CD"$ \ Left: Before master thesis (v1.13.0), Right: after (v2.0.4)],
   grid(
-    columns: 2, gutter: 1cm,
+    columns: 2,
+    gutter: 1cm,
     table(
       columns: 3,
       table.header(
@@ -410,8 +403,9 @@ We will compare the project before and after the master thesis by Thomas.
         [*$#sym.Delta"CD"$*],
         [*locc*],
       ),
+
       "Jonas", "54.987%", "62.370%",
-      "Thomas",  "21.425%", "15.719%",
+      "Thomas", "21.425%", "15.719%",
       "Emil", "15.793%", "13.482%",
       "Kristoffer", "7.124%", "7.625%",
       "Mircea", "0.670%", "0.155%",
@@ -423,13 +417,14 @@ We will compare the project before and after the master thesis by Thomas.
         [*$#sym.Delta"CD"$*],
         [*locc*],
       ),
-      "Jonas", "47.069%", "58.908%",  
-      "Thomas", "46.636%", "24.148%", 
-      "Emil", "3.260%", "10.021%", 
-      "Dawid", "3.241%", "1.856%", 
+
+      "Jonas", "47.069%", "58.908%",
+      "Thomas", "46.636%", "24.148%",
+      "Emil", "3.260%", "10.021%",
+      "Dawid", "3.241%", "1.856%",
       "Kristoffer", "0.341%", "4.134%",
     ),
-  )
+  ),
 ) <beforeAndAfterTThesisTable>
 
 See @beforeAndAfterTThesis for the distribution over cumulative byte distance, LoCC and $#sym.Delta"CD"$ over the two time periods. See @beforeAndAfterTThesisTimeSeris for how the cumulative distribution has changes over time.
@@ -442,46 +437,43 @@ See @beforeAndAfterTThesis for the distribution over cumulative byte distance, L
     columns: 1,
     gutter: 1cm,
     image("assets/before_thesis.png"),
-    image("assets/after_thesis.png")
- )
+    image("assets/after_thesis.png"),
+  ),
 ) <beforeAndAfterTThesis>
 
 #figure(
   caption: [
-    Cumulative area charts of the author distribution over time. \ 
-    Overlap (top), stacked (middle) stacked 100% (bottom) \ 
+    Cumulative area charts of the author distribution over time. \
+    Overlap (top), stacked (middle) stacked 100% (bottom) \
     $#sym.Delta"CD"$ based (left) and LoC based (right)
   ],
   grid(
     columns: 2,
     rows: 3,
     gutter: 1cm,
-    image("assets/CDD no stack.svg"),
-    image("assets/LoC no stack.svg"),
-    image("assets/CDD stack.svg"),
-    image("assets/LoC stack.svg"),
-    image("assets/CDD stack100.svg"),
-    image("assets/LoC stack100.svg"),
- )
+    image("assets/CDD no stack.svg"), image("assets/LoC no stack.svg"),
+    image("assets/CDD stack.svg"), image("assets/LoC stack.svg"),
+    image("assets/CDD stack100.svg"), image("assets/LoC stack100.svg"),
+  ),
 ) <beforeAndAfterTThesisTimeSeris>
 
 === 5.3.3 Observations: Survivorship Bias Skew
 
-We observe that before Thomas worked intensively on the project, his contribution distributions measured in LoCC and $#sym.Delta"CD"$ were fairly close, however, after his thesis, his share of accumulated $#sym.Delta"CD"$ equalized with that of Jonas. 
+We observe that before Thomas worked intensively on the project, his contribution distributions measured in LoCC and $#sym.Delta"CD"$ were fairly close, however, after his thesis, his share of accumulated $#sym.Delta"CD"$ equalized with that of Jonas.
 
 This is also clear to see on the area time series charts in @beforeAndAfterTThesisTimeSeris. We can see that using the $#sym.Delta"CD"$ metric, Thomas is able to surpass Jonas in the author distribution. We can also clearly see when Thomas merged his master thesis into the repository and that the merge technique was squashing all of the commits into one, hence the big spike upwards and long period of few commits. This clearly illustrates the information that is lost when developers choose squash merging over regular merges or rebase merging strategies. This is a limitation that neither LoCC, $#sym.Delta"CD"$ or any other metric can preserve, unless the commits are recovered by rebasing them back into the branch.
 
 = Discussion <sec:discussion>
 
 == Interpretation of RQ1 Findings
-// Summarize what the correlation between $#sym.Delta"CD"$ and LoCC tells us about CD’s representativeness
+// Summarize what the correlation between $#sym.Delta"CD"$ and LoCC tells us about CD's representativeness
 // Discuss whether CD better captures complexity than LoCC and under what conditions
 
 In @RQ1Findings, we observed that there was not necessarily a clear correlation between LoCC and $#sym.Delta"CD"$, which tells us that the two metrics measure different things and have their own purpose.
 
 == Interpretation of RQ2 Findings
 // Explain how $#sym.Delta"CD"$ varies across commit types (Test, Fix, Feat, etc.)
-// Reflect on CD’s ability to discriminate intent compared to LoCC
+// Reflect on CD's ability to discriminate intent compared to LoCC
 
 In @RQ2Findings, we observed that certain types of commits contribute more information to the codebase than others. This is intuitive, as introducing a novel feature typically adds more unique content than modifying existing code for bug fixes or version bumps.
 
@@ -489,11 +481,11 @@ In @RQ2Findings, we observed that certain types of commits contribute more infor
 // Analyze the author-level CD vs. LoCC aggregates
 // Discuss cases where CD highlights contributions that LoCC misses (and vice versa)
 
-There are several hypothesis for the differences observed in @RQ3Findings. Since Thomas changed a lot of the codebase during his thesis work, the survivorship bias of the metric favor his recent changes, when judging the history of the project. Another part of the explanation might be that his thesis entailed adding a database to Git Truck, contributing a lot of SQL code to an already TypeScript dominated project, which might also explain the large spike in the $#sym.Delta"CD"$ attribution to Thomas. The hypothesis being that contributing SQL code to the codebase will compress worse than contributing TypeScript code. 
+There are several hypothesis for the differences observed in @RQ3Findings. Since Thomas changed a lot of the codebase during his thesis work, the survivorship bias of the metric favor his recent changes, when judging the history of the project. Another part of the explanation might be that his thesis entailed adding a database to Git Truck, contributing a lot of SQL code to an already TypeScript dominated project, which might also explain the large spike in the $#sym.Delta"CD"$ attribution to Thomas. The hypothesis being that contributing SQL code to the codebase will compress worse than contributing TypeScript code.
 
 This demonstrates the built in survivorship bias that the metric includes and illustrate how you need to be aware of this when using the metric for judging work. For judging work done in group projects, one should select time ranges that correspond to the period of work during the project.
 
-We see that if we measure the author distribution based on cumulative $#sym.Delta"CD"$ contributions, we get survivorship bias built into the metric, which tells us more about who contributed the most to get the system in its current state. 
+We see that if we measure the author distribution based on cumulative $#sym.Delta"CD"$ contributions, we get survivorship bias built into the metric, which tells us more about who contributed the most to get the system in its current state.
 
 == Practical Implications
 // Implications for software teams: tool adoption, commit practices, metric dashboards
@@ -514,13 +506,13 @@ While measuring automatic velocity is a good idea, it is not the only thing to c
 
 There are however some limitations to this approach, that makes it less desirable compared to alternatives, depending on the needs.
 
-=== Performance: 
+=== Performance:
 
-We've found that, at least with the current implementation, compressed distance is much slower to compute than traditional metrics like LoCC built in to Git Truck. For example, analyzing the entire history of Commitizen in Git Truck was measured to take $1.55#sym.plus.minus 0.07$ seconds, while it takes $374.28#sym.plus.minus 5.41$ seconds for the proposed tool in its current state, making it a $#sym.approx 250 $ times slower metric in this scenario. 
+We've found that, at least with the current implementation, compressed distance is much slower to compute than traditional metrics like LoCC built in to Git Truck. For example, analyzing the entire history of Commitizen in Git Truck was measured to take $1.55#sym.plus.minus 0.07$ seconds, while it takes $374.28#sym.plus.minus 5.41$ seconds for the proposed tool in its current state, making it a $#sym.approx 250$ times slower metric in this scenario.
 
 === Scalability
 
-For very large repositories, it becomes unfeasible to calculate the compression distance for the entire project at once, as it requires a lot of memory and processing power. This is due to the fact that the compression algorithm needs to keep track of the entire state of the repository in memory. The limited window size @cebrian2005common leading to distorted distance measurements, especially in worst case when comparing identical objects exceeding these size constraints. This means that we are back to just measuring something similar to the byte distance. 
+For very large repositories, it becomes unfeasible to calculate the compression distance for the entire project at once, as it requires a lot of memory and processing power. This is due to the fact that the compression algorithm needs to keep track of the entire state of the repository in memory. The limited window size @cebrian2005common leading to distorted distance measurements, especially in worst case when comparing identical objects exceeding these size constraints. This means that we are back to just measuring something similar to the byte distance.
 
 === Biases
 
@@ -531,9 +523,9 @@ The built in survivorship bias is included with this metric for better or for wo
 == Summary of Key Contributions
 // Recap: definition of Compression Distance (CD) metric
 // Recap: implementation in Git Truck API and empirical evaluation
-// Recap: CD’s advantages over LoCC demonstrated via RQ1-RQ3
+// Recap: CD's advantages over LoCC demonstrated via RQ1-RQ3
 
-This paper has layed out a method for using compression as a metric for information distance, defined as
+This paper has presented out a method for using compression as a metric for information distance, defined as
 
 $ "CD"(x,y) = |Z(x)| - |Z(x #sym.union y)| $
 
@@ -546,7 +538,7 @@ The results suggest that CD provides a more nuanced and robust measure of softwa
 // Explore normalized variants (NCD) and theoretical bounds
 // Scale to larger repositories and distributed systems
 // Integrate CD into CI/CD pipelines and developer dashboards
-// Study CD’s applicability to non-code artifacts (configs, docs)
+// Study CD's applicability to non-code artifacts (configs, docs)
 
 === Useability
 
@@ -572,7 +564,7 @@ This shows that future work could be done to investigate whether this metric cou
 
 === Performance
 
-Future work could be done to investigate methods of speeding up the computational process. The process might be parallelizeable and could utilize using shared memory with dynamic garbage collection, to reduce the memory overhead of the analysis. The current approach caches file buffers, but leaves garbage collection to the runtime. 
+Future work could be done to investigate methods of speeding up the computational process. The process might be parallelizeable and could utilize using shared memory with dynamic garbage collection, to reduce the memory overhead of the analysis. The current approach caches file buffers, but leaves garbage collection to the runtime.
 
 === Bias elimination
 
