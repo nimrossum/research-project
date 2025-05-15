@@ -136,7 +136,7 @@ The issue is further exacerbated when developers squash commits, potentially los
 Another case where the LoCC metric falls short is when performing automated actions that affects a vast amount of files and leads to spikes in line changes. Examples of this include running formatting and linting scripts or automated lock file updates when installing packages, all of which can lead to astronomical amounts of line changes. These kinds of changes do not directly reflect genuine development effort, but they still result in high LoCC values from which one often draw this conclusion. As an illustrative example, see @filesAffectedByAutomation for a visualization from the tool Git Truck showing accumulated line changes per file. Notice how the file "package-lock.json" is dominating the rest of the files, due to it being an auto generated file that is modified automatically by package managers in the JavaScript ecosystem. This is an example of line changes that should to be disregarded.
 
 #figure(
-  caption: [Screenshot of Git Truck @github-git-truck:online visualizing accumulated line changes per file],
+  caption: [Screenshot of Git Truck @github-git-truck:online visualizing accumulated line changes per file. More vibrant colors indicate larger amounts of LoCC],
   image("assets/files-affected-by-automation.png"),
 ) <filesAffectedByAutomation>
 
@@ -239,21 +239,15 @@ From @git-repositories, we see that all the chosen repositories lie below the ma
     // columns: (4.4cm, 2cm, 1.9cm, 0.9fr),
     columns: 4,
     align: (left, left, right, right, right),
-    [],
-    table.cell(
-      colspan: 2,
-      align: center,
-      [*Newest commit*],
-    ),
-    [],
+
     [*Repository\@revision*],
-    [*Hash*],
-    [*Buffer size* \ ($"MB"$)],
     [*Commits*],
-    [Git Truck\@ncd @github-git-truck:online], "bf46e09", $0.365$, "1356", // 383292/((2^10)^2) = 0.365535736
-    [Git Truck\@v2.0.4 @github-git-truck:online], "d385ace", $0.318$, "1260", //333644/((2^10)^2) = 0.318
-    [Git Truck\@v1.13.0 @github-git-truck:online], "71ae30d", $0.259$, "1242", // 270329/((2^10)^2) = 0.259
-    [Commitizen\@master @github-commitizen:online], "e177141", $0.771$, "1977" // 808691/((2^10)^2) = 0.771
+    [*Hash*],
+    [*Buffer size*],
+    [Git Truck\@ncd @github-git-truck:online], "1,356", "bf46e09", $0.365 "MB"$, // 383292/((2^10)^2) = 0.365535736
+    [Git Truck\@v2.0.4 @github-git-truck:online], "1,260", "d385ace", $0.318 "MB"$, //333644/((2^10)^2) = 0.318
+    [Git Truck\@v1.13.0 @github-git-truck:online], "1,242", "71ae30d", $0.259 "MB"$, // 270329/((2^10)^2) = 0.259
+    [Commitizen\@master @github-commitizen:online], "1,977", "e177141", $0.771 "MB"$ // 808691/((2^10)^2) = 0.771
   ),
 ) <git-repositories>
 
