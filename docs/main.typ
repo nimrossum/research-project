@@ -26,7 +26,7 @@
     \
     \
     #text[
-      Lines of code changed (LoCC) is one of the most widely used distance metrics in the software industry, but it suffers from several key drawbacks that can mislead when analyzing developer effort and project activity. In this paper, we explore the shortcomings of LoCC and propose an alternative metric: Compression Distance,  derived from Normalized Compression Distance (NCD) and lossless compression algorithms with large search windows. Formally, $"CD"(x,y) = |C(x)| - |C(x #sym.union y)|$, where $|C(#sym.dot)|$ denotes the compressed size. The results suggest that CD provides a more nuanced and robust measure of software evolution, to be used as a complementary metric to proven metrics like LoCC, while being aware of the biases in the metric.
+      Lines of code changed (LoCC) is one of the most widely used distance metrics in the software industry, but it suffers from several key drawbacks that can mislead when analyzing developer effort and project activity. In this paper, we explore the shortcomings of LoCC and propose an alternative metric: Compression Distance,  derived from Normalized Compression Distance (NCD) and lossless compression algorithms with large search windows. Formally, $"CD"(x,y) = |C(x #sym.union y)| - |C(x)|$, where $|C(#sym.dot)|$ denotes the compressed size. The results suggest that CD provides a more nuanced and robust measure of software evolution, to be used as a complementary metric to proven metrics like LoCC, while being aware of the biases in the metric.
     ]
   ],
   preface: [
@@ -57,7 +57,7 @@ While LoCC is simple to compute and interpret, it suffers from several key drawb
 
 == Research Questions <researchQuestions>
 This paper investigates three research questions:
-- RQ1: Is the compression distance a more representative metric for quantifying the complexity of a version-controlled software repository than LoCC?
+- RQ1: Is the $#sym.Delta"CD"$ of a commit correlated with LoCC?
 - RQ2: To what extent does compression distance discriminate between manual or semi-automatic commit types (e.g., bug fix, feature, refactoring, documentation, style)?
 - RQ3: Does compression distance suffer from the same limitations as LoCC in quantifying the contributions of developers?
 
@@ -68,7 +68,7 @@ We make the following contributions:
 - We identify and characterize key limitations of LoCC as a proxy for developer effort and system evolution.
 - We define Compression Distance (CD), a distance metric based on lossless compression, and derive its per-commit delta ($#sym.Delta"CD"$) as a complementary metric to LoCC.
 - We implement CD computation as API endpoints in the Git Truck analysis tool, leveraging ZStandard with a 2 MB search window by default.
-- We empirically evaluate CD on two projects (Git Truck and Commitizen), answering RQ1–RQ3 and demonstrating CD’s advantages in quantifying complexity and discriminating commit types.
+- We empirically evaluate CD on two projects (Git Truck and Commitizen), answering RQ1-RQ3 and demonstrating CD's advantages in quantifying complexity and discriminating commit types.
 - We discuss the practical biases and limitations of CD, offering guidelines for its adoption in research and industry.
 
 The remainder of the paper is organized as follows. @sec:background reviews LoCC and its limitations. @sec:approach presents our proposed CD metric and its theoretical foundation. @sec:methodology details the methodology: data collection, metric computation, commit classification, and statistical analysis. @sec:results reports results for RQ1-RQ3. @sec:discussion discusses implications, practical considerations, and limitations. Finally, Section 7 concludes and outlines directions for future work.
@@ -175,7 +175,7 @@ Instead of measuring the static distance in bytes before and after the commit, w
 
 We define the Compression Distance $"CD"$ metric as a measure of how much a given concatenated commit buffer compresses with the baseline commit buffer:
 
-$ "CD"(x, y) = |C(x)| - |C(x #sym.union y)| $ <def:compression_distance>
+$ "CD"(x, y) = |C(x #sym.union y)| - |C(x)| $ <def:compression_distance>
 
 
 
@@ -234,7 +234,7 @@ From @git-repositories, all the chosen repositories lie below the maximum of 1MB
     // columns: (4.4cm, 2cm, 1.9cm, 0.9fr),
     columns: 4,
     align: (left, left, right, right, right),
-  
+
     [*Repository\@revision*],
     [*Commits*],
     [*Hash*],
@@ -317,7 +317,7 @@ It was evaluated whether per-commit $#sym.Delta"CD"$ align with traditional comp
 
 In this section, we will explore whether we have answered the research questions presented in @researchQuestions, provided here for convenience:
 
-- RQ1: Is the compression distance a more representative metric for quantifying the complexity of a version-controlled software repository than LoCC?
+- RQ1: Is the $#sym.Delta"CD"$ of a commit correlated with LoCC?
 - RQ2: To what extent does compression distance discriminate between manual or semi-automatic commit types (e.g., bug fix, feature, refactoring, documentation, style)?
 - RQ3: Does compression distance suffer from the same limitations as LoCC in quantifying the contributions of developers?
 
@@ -505,14 +505,11 @@ The built in survivorship bias is included with this metric for better or for wo
 // Recap: implementation in Git Truck API and empirical evaluation
 // Recap: CD's advantages over LoCC demonstrated via RQ1-RQ3
 
-This paper has presented a method for using compression as a metric for information distance, defined as
+This paper has presented a method for using compression as a metric for information distance as a complementary metric to LoCC, defined as:
 
-$ "CD"(x,y) = |C(x)| - |C(x #sym.union y)| $
+$ "CD"(x,y) = |C(x #sym.union y)| - |C(x)| $
 
-where $C$ is a compression function, $x$ is the concatenated commit buffer and $y$ is the baseline concatenated commit buffer.
-
-
-The results suggest that CD provides a more nuanced and robust measure of software evolution, paving the way for its adoption in both academic research and industry practice. The results also show that you need to be aware of built in biases in the metric.
+where $C$ is a lossless compression function, $x$ is the concatenated commit buffer and $y$ is the baseline concatenated commit buffer. CD computation was implemented as API endpoints in the Git Truck analysis tool, leveraging ZStandard with a 2 MB search window by default. We empirically evaluated CD on two projects (Git Truck and Commitizen), answering RQ1-RQ3 and demonstrating CD's advantages in quantifying complexity and discriminating commit types. The results suggest that CD provides a more nuanced and robust measure of software evolution. We discussed the practical biases and limitations of CD, offering guidelines for its adoption in research and industry.
 
 == Future Work
 
