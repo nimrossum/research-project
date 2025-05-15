@@ -427,7 +427,7 @@ We will compare the project before and after the master thesis by Thomas.
   ),
 ) <beforeAndAfterTThesisTable>
 
-See @beforeAndAfterTThesis for the distribution over cumulative byte distance, LoCC and $#sym.Delta"CD"$ over the two time periods. See @beforeAndAfterTThesisTimeSeris for how the cumulative distribution has changes over time.
+See @beforeAndAfterTThesis for the distribution over cumulative byte distance, LoCC and $#sym.Delta"CD"$ over the two time periods. See @beforeAndAfterTThesisTimeSeries for how the cumulative distribution has changes over time.
 
 
 
@@ -455,13 +455,13 @@ See @beforeAndAfterTThesis for the distribution over cumulative byte distance, L
     image("assets/CDD stack.svg"), image("assets/LoCC stack.svg"),
     image("assets/CDD stack100.svg"), image("assets/LoCC stack100.svg"),
   ),
-) <beforeAndAfterTThesisTimeSeris>
+) <beforeAndAfterTThesisTimeSeries>
 
 === 5.3.3 Observations: Survivorship Bias Skew
 
 We observe that before Thomas worked intensively on the project, his contribution distributions measured in LoCC and $#sym.Delta"CD"$ were fairly close, however, after his thesis, his share of accumulated $#sym.Delta"CD"$ equalized with that of Jonas.
 
-This is also clear to see on the area time series charts in @beforeAndAfterTThesisTimeSeris. We can see that using the $#sym.Delta"CD"$ metric, Thomas is able to surpass Jonas in the author distribution. We can also clearly see when Thomas merged his master thesis into the repository and that the merge technique was squashing all of the commits into one, hence the big spike upwards and long period of few commits. This clearly illustrates the information that is lost when developers choose squash merging over regular merges or rebase merging strategies. This is a limitation that neither LoCC, $#sym.Delta"CD"$ or any other metric can preserve, unless the commits are recovered by rebasing them back into the branch.
+This is also clear to see on the area time series charts in @beforeAndAfterTThesisTimeSeries. We can see that using the $#sym.Delta"CD"$ metric, Thomas is able to surpass Jonas in the author distribution. We can also clearly see when Thomas merged his master thesis into the repository and that the merge technique was squashing all of the commits into one, hence the big spike upwards and long period of few commits. This clearly illustrates the information that is lost when developers choose squash merging over regular merges or rebase merging strategies. This is a limitation that neither LoCC, $#sym.Delta"CD"$ or any other metric can preserve, unless the commits are recovered by rebasing them back into the branch.
 
 = Discussion <sec:discussion>
 
