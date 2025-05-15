@@ -55,10 +55,6 @@ Software engineering has consistently explored metrics to measure and compare th
 
 While LoCC is simple to compute and interpret, it suffers from several key drawbacks that can mislead when analyzing developer effort and project activity. In this paper, we will explore the shortcomings of LoCC and propose an alternative metric: Compression Distance (CD), derived from lossless compression algorithms with large search windows. By measuring the compressibility of changes between software revisions, CD offers a novel perspective on software evolution, addressing many of the shortcomings inherent in LoCC.
 
-Through a series of experiments, we evaluate the effectiveness of CD in quantifying code complexity, distinguishing between commit types, and mitigating biases present in LoCC.
-
-The results suggest that CD provides a more nuanced and robust measure of software evolution, paving the way for its adoption in both academic research and industry practice. However, you need to be aware of built in biases in the metric.
-
 == Research Questions <researchQuestions>
 This paper investigates three research questions:
 - RQ1: Is the compression distance a more representative metric for quantifying the complexity of a version-controlled software repository than LoCC?
@@ -68,12 +64,14 @@ This paper investigates three research questions:
 
 == Contributions & Paper Organization
 We make the following contributions:
-- We define Compression Distance (CD), a distance metric based on lossless compression, and derive its per-commit delta ($#sym.Delta"CD"$).
-- We implement CD computation as API endpoints in the Git Truck analysis tool, leveraging ZStandard with a 2 MB search window.
-- We empirically evaluate CD on two projects (Git Truck and Commitizen), showing varying correlation with LoCC, improved discrimination of commit types, and distinct author-level insights.
 
-The remainder of the paper is organized as follows. @sec:background reviews LoCC and its limitations. @sec:approach presents our proposed CD metric and its theoretical foundation. @sec:methodology details the methodology: data collection, metric computation, commit classification, and statistical analyses. @sec:results reports results for RQ1-RQ3. @sec:discussion discusses implications, practical considerations, and limitations. Finally, Section 7 concludes and outlines directions for future work.
+- We identify and characterize key limitations of LoCC as a proxy for developer effort and system evolution.
+- We define Compression Distance (CD), a distance metric based on lossless compression, and derive its per-commit delta ($#sym.Delta"CD"$) as a complementary metric to LoCC.
+- We implement CD computation as API endpoints in the Git Truck analysis tool, leveraging ZStandard with a 2 MB search window by default.
+- We empirically evaluate CD on two projects (Git Truck and Commitizen), answering RQ1–RQ3 and demonstrating CD’s advantages in quantifying complexity and discriminating commit types.
+- We discuss the practical biases and limitations of CD, offering guidelines for its adoption in research and industry.
 
+The remainder of the paper is organized as follows. @sec:background reviews LoCC and its limitations. @sec:approach presents our proposed CD metric and its theoretical foundation. @sec:methodology details the methodology: data collection, metric computation, commit classification, and statistical analysis. @sec:results reports results for RQ1-RQ3. @sec:discussion discusses implications, practical considerations, and limitations. Finally, Section 7 concludes and outlines directions for future work.
 
 = Background <sec:background>
 
@@ -136,9 +134,8 @@ Another case where the LoCC metric falls short is when performing automated acti
 
 #figure(
   caption: [Screenshot of Git Truck @github-git-truck:online visualizing accumulated line changes per file. More vibrant colors indicate larger amounts of LoCC],
-  image("assets/files-affected-by-automation.png"),
+  image(width: 12cm, "assets/files-affected-by-automation.png"),
 ) <filesAffectedByAutomation>
-
 
 If the developers practice good Git hygiene (such as keeping commits small and focused, not using squash merging, and writing descriptive commit or conventional commit messages#footnote([Some projects conform to conventional commit messages using tools like Commitizen @github-commitizen:online])), you can perform filtering to focus on for example commits fixing bugs, refactoring or implementing features, but in reality, not all teams conform to these practices.
 
