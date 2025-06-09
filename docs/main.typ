@@ -154,7 +154,7 @@ In the rest of this chapter, we will show how to build this metric by trying to 
 
 == Mitigating the problem of ambiguous definitions of LoCC and rename-detection pitfalls
 
-To mitigate the ambiguity of LoCC described in @loccDef, we can instead consider the change in the number of bytes as a quantifier of developer activity. However, this means we can no longer rely on line-based diffing algorithms, akin to those used in Git @Gitdiffo88:online and must use an alternative method to measure the distance between revisions. We can mitigate the problem with ambiguity and renames by concatenating all the files existing in each commit into a single file buffer. We will refer to this as the concatenated commit buffer, $"CCB"$. 
+To mitigate the ambiguity of LoCC described in @loccDef, we can instead consider the change in the number of bytes as a quantifier of developer activity. However, this means we can no longer rely on line-based diffing algorithms, akin to those used in Git @Gitdiffo88:online and must use an alternative method to measure the distance between revisions. We can mitigate the problem with ambiguity and renames by concatenating all the files existing in each commit into a single file buffer. We will refer to this as the concatenated commit buffer, $"CCB"$.
 
 We can compute the change in the size in bytes before and after the commit, which gives us the byte distance, $#sym.Delta (x)$. See @byte-distance-metric for the formal definition.
 
@@ -168,7 +168,7 @@ However, this method does not address the problem with automatic actions oversta
 
 Instead of measuring the static distance in bytes before and after the commit, we can instead try to measure the compression of the changes we added. Using a lossless compression algorithm, we compress the concatenation of the given commit buffer $x$ with the newest revision of the project $y$ and compare this value with the one for the previous commit $x-1$. The hypothesis being that this would make it such that large repetitive actions would have a lower impact, since they would compress better than smaller, but more complex changes. This assumes that the changes added in a commit will compress better in the presence of similar code. This requires the compression algorithm to have search window larger than double the size of the project files we intend to analyze, as explored in @cebrian2005common.
 
-We define the Compression Distance $"CD"$ as a measure of how much a given concatenated commit buffer compresses with the baseline commit buffer, see @def:compression_distance. 
+We define the Compression Distance $"CD"$ as a measure of how much a given concatenated commit buffer compresses with the baseline commit buffer, see @def:compression_distance.
 
 $ "CD"(x, y) = |C(x #sym.union y)| - |C(x)| $ <def:compression_distance>
 
@@ -180,7 +180,7 @@ Now we can define the impact of the commit, the #dcd metric, compared to the pre
 
 $ #dcd (x) = "CD"(x-1) - "CD"(x) $ <def:compression_distance_delta>
 
-Note that if the CD of $x-1$ has decreased after applying commit $x$, it means that we have gotten closer to the final revision. This is a bit unintuitive, as it is the opposite of Euclidian distances, but this is due to the fact that we are going backwards throughout the history of the project, which means distances are inverted. A positive #dcd indicates that we moved closer to the final revision, while a negative #dcd means we moved away from the project. 
+Note that if the CD of $x-1$ has decreased after applying commit $x$, it means that we have gotten closer to the final revision. This is a bit unintuitive, as it is the opposite of Euclidian distances, but this is due to the fact that we are going backwards throughout the history of the project, which means distances are inverted. A positive #dcd indicates that we moved closer to the final revision, while a negative #dcd means we moved away from the project.
 
 This method introduces intentional survivorship bias by compressing each commit buffer in the presence of the final commit buffer. As a result, changes that are more similar to the final version compress better and are valued more highly. This helps tell a story about how the codebase evolved toward its current state and which commits were most influential in getting there. For some purposes, this bias is acceptable—as long as it's acknowledged. For instance, a detour that was later discarded will show a negative #dcd, indicating it moved the project away from the final state, though it may still have been a valuable exploration. See @deltaCDZeeguu for a diagram illustrating how some commits increase the distance from the final version.
 
@@ -276,7 +276,7 @@ Each CCB was compressed using ZStandard (zstd) @zstdlibc51:online. The ZStandard
 
 === Calculating #dcd
 
-The #dcd for each commit is computed by subtracting the CD for the previous commit from the CD for the current commit, as shown in @def:compression_distance_delta. 
+The #dcd for each commit is computed by subtracting the CD for the previous commit from the CD for the current commit, as shown in @def:compression_distance_delta.
 
 == Commit Classification
 
@@ -393,7 +393,7 @@ To assess how CD shifts our view of who “moves the most code” compared to tr
         [*#dcd*],
         [*locc*],
       ),
-      
+
 "Jonas", "46.412%", "58.445%",
 "Thomas", "46.377%", "24.550%",
 "Dawid", "3.224%", "1.946%",
@@ -435,7 +435,7 @@ See @beforeAndAfterTThesisTimeSeries for how the cumulative distribution has cha
     gutter: 0.1cm,
     [Cumulative ΔCD (bytes)\ contributed to  Git Truck],
     grid.vline(
-      
+
     ),
     [Cumulative LoCC (lines)\ contributed to Git Truck],
     image("assets/CDD no stack.svg"),
@@ -507,10 +507,10 @@ The built in survivorship bias is included with this metric for better or for wo
 = Conclusion
 
 In this project, we set out to quantify software evolution via a novel compression Distance (CD) metric, complementing the existing LoCC measure. Below we recap our key contributions before outlining directions for future research.
- 
+
 == Summary of Key Contributions
 
-We defined the Compression Distance (CD) metric as an information-distance complement to LoCC (@def:compression_distance). We implemented CD computation in the Git Truck API using ZStandard with a 2 MB search window. Empirical evaluation on Git Truck and Commitizen (RQ1-RQ3) showed that CD more finely quantifies code complexity and distinguishes commit types. Finally, we discussed CD’s biases and provided adoption guidelines. 
+We defined the Compression Distance (CD) metric as an information-distance complement to LoCC (@def:compression_distance). We implemented CD computation in the Git Truck API using ZStandard with a 2 MB search window. Empirical evaluation on Git Truck and Commitizen (RQ1-RQ3) showed that CD more finely quantifies code complexity and distinguishes commit types. Finally, we discussed CD’s biases and provided adoption guidelines.
 
 == Future Work
 
