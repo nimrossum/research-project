@@ -93,7 +93,7 @@
     ),
   ),
 
-  [✅ #dcd and LoCC correlate, but not perfectly $#sym.arrow$ #dcd captures more than raw line changes]
+  [✅ #dcd and LoCC *partially correlate* $#sym.arrow$ #dcd captures more than raw line changes]
 )
 #v(1fr)
 
@@ -101,78 +101,6 @@
 
 // Intuitivt - hvorfor vil vi have en mid correlation
 
-// Not sure why a power regression performs better for Commitizen
-
-// 1
-== RQ2: Commit Type Discrimination
-
-#figure(
-    caption: [
-      Commits in the Commitizen repository categorized using conventional keywords#footnote("https://www.conventionalcommits.org/en/v1.0.0/")
-    ],
-  image(
-    height: 17.0em,
-    "assets/commitizenCD∆ vs LoCC.svg",
-  ),
-)
-
-// 2
-== RQ2: Commit Type Discrimination
-#grid(
-  columns: (2fr, 1.5fr),
-  rows: (auto, auto, auto),
-  gutter: 1em,
-  grid.cell(
-    colspan: 2,
-    figure(
-      image(
-        height: 17.0em,
-        "assets/Commitizen CD∆ vs LoCC_fix_feat.svg",
-      ),
-    ),
-  ),
-  // [
-  //   #text(fill: color.rgb(250, 0, 00), weight: "bold", "Bug Fixes"): lower #dcd, more repetitive
-  // ],
-  // [
-  //   #text(fill: color.rgb(50, 170, 50), weight: "bold", "Features"): higher #dcd, typically novel code
-  // ],
-
-  // grid.cell(
-  //   colspan: 2,
-  //   [✅ #dcd can partly discriminate between some commit types],
-  // )
-)
-
-// 3
-== RQ2: Commit Type Discrimination
-#grid(
-  columns: (2fr, 1.5fr),
-  rows: (auto, auto, auto),
-  gutter: 1em,
-  grid.cell(
-    colspan: 2,
-    figure(
-      image(
-        height: 17.0em,
-        "assets/Commitizen CD∆ vs LoCC_fix_feat.svg",
-      ),
-    ),
-  ),
-  [
-    #text(fill: color.rgb(250, 0, 00), weight: "bold", "Bug Fixes"): lower #dcd, changes to existing code
-  ],
-  [
-    #text(fill: color.rgb(50, 170, 50), weight: "bold", "Features"): higher #dcd, typically novel code
-  ],
-
-  // grid.cell(
-  //   colspan: 2,
-  //   [✅ #dcd can partly discriminate between some commit types],
-  // )
-)
-
-// 4
 == RQ2: Commit Type Discrimination
 #grid(
   columns: (2fr, 1.5fr),
@@ -196,25 +124,25 @@
 
   grid.cell(
     colspan: 2,
-    [✅ #dcd can partly discriminate between some commit types, at least for this project],
+    [✅ #dcd can partly *discriminate* between some *commit types*, at least for this project],
   )
 )
 
-== RQ3: Advantages - Robust to structural changes
+== RQ3: Robustness to structural changes
 
 // To explain how the metric is robust to renames, let's look at how to compute the metric for a Git Repository:
 
 #figure(
   caption: "ΔCD (Difference in Compression Distance) Explained",
-  image("assets/ΔCD explanation.png", height: 6.5cm)
+  image("assets/ΔCD explanation.png", height: 6.5cm),
 )
 
 #v(1fr)
 
-✅ #dcd is insensitive to project structure at commit granularity
+✅ #dcd is insensitive to *project structure* at commit granularity
 
 
-== RQ3: Advantages - Survivorship Bias
+== RQ3: Survivorship Bias
 
 // You need to be aware of what question you are asking.
 // If you want to ask how much is each person responsible of the way the codebase looks today, you can use #dcd-
@@ -247,7 +175,7 @@
 
 ✅ #dcd reflects *lasting impact* on the codebase using survivorship bias
 
-== Limitations: Performance and Scalability
+== RQ3: Performance and Scalability
 
 #figure(
   image(
@@ -308,14 +236,8 @@
   // Several of these experiments were only done on a single project
   rect(fill: silver, [Robustness to formatting changes etc.]),
 
-  // Visualize in *analysis tools* (e.g., in Git Truck)
-  rect(fill: silver, [Integration]),
-
-  // Improve and thoroughly test *performance* and *scalability*
-  rect(fill: silver, [Preprocessing]),
-
-  // Visualize in *analysis tools* (e.g., in Git Truck)
-  rect(fill: silver, [Use cases]),
+  // // Visualize in *analysis tools* (e.g., in Git Truck)
+  // rect(fill: silver, [Integration])
 
   // Explore more use cases for the metric
   // Blame has survivorship bias, but is prone to the renaming problem
