@@ -86,7 +86,7 @@ Linear regression $R^2$ for *commitizen*: 0.7
 
 #v(1fr)
 
-#figure(image(height: 7.4cm, width: auto, "assets/LoCC vs ∆CD for commitizen-tools_commitizen (github).svg"))
+#figure(image(height: 7.3cm, width: auto, "assets/LoCC vs ∆CD for commitizen-tools_commitizen (github).svg"))
 
 #v(1fr)
 ✅ #dcd and LoCC *partially correlate* $#sym.arrow$ #dcd captures more than raw line changes
