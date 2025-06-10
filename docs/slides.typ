@@ -37,7 +37,7 @@
 
 - _Lines of Code Changed_ (LoCC)
   - De facto standard for measuring code changes
-  - Has it's limitations (e.g. renaming files)
+  - Has it's limitations (e.g. structural changes, formatting changes, etc.)
 
 
 #figure(caption: "LoCC in a GitHub Pull Request", image("assets/LoCC in GitHub.png"))
@@ -72,7 +72,7 @@
       marker: sym.arrow,
       [Partial linear correlation, $R^2={0.8, 0.7}$], // We theoretically expected an imperfect correlation
       [For Commitizen#footnote("https://github.com/commitizen-tools/commitizen/") repo, #greenText[features] and #redText[bug fixes] \ stand apart], // We expected this, since #dcd captures semantic change
-      [Robust to renames, survivorship bias / \ 250$#sym.times$ slower than LoCC, scaling challenges], // We expected this, since #dcd is based on compression and manually handling file buffers
+      [Robust to structural changes, survivorship bias / \ 250$#sym.times$ slower than LoCC, scaling challenges], // We expected this, since #dcd is based on compression and manually handling file buffers
     )
   ],
 )
@@ -200,7 +200,7 @@
   )
 )
 
-== RQ3: Advantages - Robust to Renames
+== RQ3: Advantages - Robust to structural changes
 
 // To explain how the metric is robust to renames, let's look at how to compute the metric for a Git Repository:
 
@@ -211,7 +211,7 @@
 
 #v(1fr)
 
-✅ #dcd is insensitive to renames and project structure
+✅ #dcd is insensitive to project structure
 
 
 == RQ3: Advantages - Survivorship Bias
@@ -306,7 +306,7 @@
   rect(fill: silver, [Generalize findings]),
 
   // Several of these experiments were only done on a single project
-  rect(fill: silver, [Test robustness]),
+  rect(fill: silver, [Robustness to formatting changes etc.]),
 
   // Visualize in *analysis tools* (e.g., in Git Truck)
   rect(fill: silver, [Integration]),
