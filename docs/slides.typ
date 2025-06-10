@@ -82,20 +82,14 @@
 
 // If we assume that the width of a code line is roughly constant, then the number of lines changed should correlate with the amount of bytes changed, which is the foundation of #dcd. Therefore, if #dcd is a different metric than LoCC, we expect it to correlate with LoCC, but not perfectly.
 
-#grid(
-  rows: (auto, 1fr, auto),
-  [Linear regression $R^2$ for *commitizen*: 0.7],
-  figure(
-    image(
-      height: 1fr,
-      width: auto,
-      "assets/LoCC vs ∆CD for commitizen-tools_commitizen (github).svg",
-    ),
-  ),
+Linear regression $R^2$ for *commitizen*: 0.7
 
-  [✅ #dcd and LoCC *partially correlate* $#sym.arrow$ #dcd captures more than raw line changes]
-)
 #v(1fr)
+
+#figure(image(height: 7.4cm, width: auto, "assets/LoCC vs ∆CD for commitizen-tools_commitizen (github).svg"))
+
+#v(1fr)
+✅ #dcd and LoCC *partially correlate* $#sym.arrow$ #dcd captures more than raw line changes
 
 // Forklar hvorfor det er fedt at der er lav correlation
 
