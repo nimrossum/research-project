@@ -95,6 +95,22 @@ Linear regression $R^2$ for *commitizen*: 0.7
 
 // Intuitivt - hvorfor vil vi have en mid correlation
 
+// Not sure why a power regression performs better for Commitizen
+
+// 1
+== RQ2: Commit Type Discrimination
+
+#figure(
+    caption: [
+      Commits in the Commitizen repository categorized using conventional keywords#footnote("https://www.conventionalcommits.org/en/v1.0.0/")
+    ],
+  image(
+    height: 17.0em,
+    "assets/commitizenCD∆ vs LoCC.svg",
+  ),
+)
+
+
 == RQ2: Commit Type Discrimination
 #grid(
   columns: (2fr, 1.5fr),
