@@ -1,8 +1,8 @@
 #import "@preview/slydst:0.1.4": *
 
-#let red(content) = text(fill: rgb(250, 0, 0), content)
-#let yellow(content) = text(fill: rgb(200, 100, 0), content)
-#let green(content) = text(fill: rgb(50, 170, 50), content)
+#let redText(content) = text(fill: rgb(250, 0, 0), content)
+#let yellowText(content) = text(fill: rgb(200, 100, 0), content)
+#let greenText(content) = text(fill: rgb(50, 170, 50), content)
 
 #let dcd = $#sym.Delta"CD"$
 
@@ -71,7 +71,7 @@
     #list(
       marker: sym.arrow,
       [Partial linear correlation, $R^2={0.8, 0.7}$], // We theoretically expected an imperfect correlation
-      [For Commitizen#footnote("https://github.com/commitizen-tools/commitizen/") repo, #green[features] and #red[bug fixes] \ stand apart], // We expected this, since #dcd captures semantic change
+      [For Commitizen#footnote("https://github.com/commitizen-tools/commitizen/") repo, #greenText[features] and #redText[bug fixes] \ stand apart], // We expected this, since #dcd captures semantic change
       [Robust to renames, survivorship bias / \ 250$#sym.times$ slower than LoCC, scaling challenges], // We expected this, since #dcd is based on compression and manually handling file buffers
     )
   ],
@@ -296,7 +296,7 @@
 )
 
 #grid(
-  rows: (3cm, 3cm),
+  rows: (2cm, 2cm, 2cm),
   columns: (7cm, 7cm),
   gutter: 1em,
   // Improve and thoroughly test *performance* and *scalability*
@@ -305,13 +305,21 @@
   // Several of these experiments were only done on a single project
   rect(fill: silver, [Generalize findings]),
 
+  // Several of these experiments were only done on a single project
+  rect(fill: silver, [Test robustness]),
+
   // Visualize in *analysis tools* (e.g., in Git Truck)
   rect(fill: silver, [Integration]),
+
+  // Improve and thoroughly test *performance* and *scalability*
+  rect(fill: silver, [Preprocessing]),
+
+  // Visualize in *analysis tools* (e.g., in Git Truck)
+  rect(fill: silver, [Use cases]),
 
   // Explore more use cases for the metric
   // Blame has survivorship bias, but is prone to the renaming problem
   // Blame: Medium slow, no rename handling possible AT ALL, EXTREME survivorship bias
-  rect(fill: silver, [Use cases]),
 )
 
 #set align(left + top)
