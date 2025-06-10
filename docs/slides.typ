@@ -211,7 +211,7 @@
 
 #v(1fr)
 
-✅ #dcd is insensitive to project structure
+✅ #dcd is insensitive to project structure at commit granularity
 
 
 == RQ3: Advantages - Survivorship Bias
